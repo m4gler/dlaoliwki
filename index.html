@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Dla Oliwii ❤️</title>
+  <meta name="description" content="Wyjątkowa, interaktywna strona stworzona z miłością dla Oliwii.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+</head>
+<body>
+  <!-- Tło z interaktywnymi cząsteczkami canvas -->
+  <canvas id="bg-canvas"></canvas>
+
+  <!-- Pływające przyciski kontrolne (dźwięk, serduszko) -->
+  <div class="floating-controls">
+    <button id="sound-btn" class="control-btn" title="Efekty dźwiękowe">
+      <span class="icon" id="sound-icon">🔊</span>
+    </button>
+    <button id="floating-heart-btn" class="control-btn heart-btn" title="Wyślij serduszko!">
+      <span class="icon">💖</span>
+      <span class="heart-counter" id="total-hearts-count">0</span>
+    </button>
+  </div>
+
+  <main class="content-wrapper">
+    <!-- SEKCJA HERO -->
+    <header class="hero-section">
+      <div class="badge-pill">
+        <span class="pulse-dot"></span>
+        <span id="hero-badge">Od wczoraj oficjalnie razem ✨</span>
+      </div>
+      
+      <h1 class="neon-title" id="main-title">
+        Dla <span class="gradient-text">Oliwii</span> <span class="heart-glow">❤️</span>
+      </h1>
+      
+      <p class="hero-subtitle" id="main-subtitle">
+        Nasza wspólna historia zaczyna się właśnie teraz...
+      </p>
+
+      <div class="hero-cta-group">
+        <a href="#counter" class="btn btn-primary">Zobacz nasz czas ⏳</a>
+        <a href="#letter" class="btn btn-secondary">Otwórz list 💌</a>
+      </div>
+    </header>
+
+    <!-- SEKCJA 1: LICZNIK CZASU RAZEM -->
+    <section id="counter" class="section glass-card">
+      <div class="section-header">
+        <span class="section-tag">Nasz Wspólny Czas</span>
+        <h2>Jesteśmy razem już przez:</h2>
+      </div>
+
+      <div class="counter-grid">
+        <div class="counter-card" id="card-days">
+          <div class="counter-glow"></div>
+          <div class="counter-number" id="count-days">0</div>
+          <div class="counter-label">Dni</div>
+        </div>
+        <div class="counter-card" id="card-hours">
+          <div class="counter-glow"></div>
+          <div class="counter-number" id="count-hours">00</div>
+          <div class="counter-label">Godzin</div>
+        </div>
+        <div class="counter-card" id="card-minutes">
+          <div class="counter-glow"></div>
+          <div class="counter-number" id="count-minutes">00</div>
+          <div class="counter-label">Minut</div>
+        </div>
+        <div class="counter-card highlight" id="card-seconds">
+          <div class="counter-glow"></div>
+          <div class="counter-number" id="count-seconds">00</div>
+          <div class="counter-label">Sekund</div>
+        </div>
+      </div>
+
+      <div class="counter-footer-text">
+        <span class="sparkle">✨</span>
+        <span id="counter-live-message">I z każdą uciekającą sekundą lubię Cię coraz bardziej!</span>
+        <span class="sparkle">✨</span>
+      </div>
+    </section>
+
+    <!-- SEKCJA 2: WIRTUALNY LIST / KOPERTA 3D -->
+    <section id="letter" class="section">
+      <div class="section-header">
+        <span class="section-tag">Wiadomość z serca</span>
+        <h2>List tylko dla Twoich oczu 💌</h2>
+        <p class="section-description">Kliknij w kopertę, aby złamać pieczęć i przeczytać wiadomość</p>
+      </div>
+
+      <div class="envelope-container" id="envelope-wrapper">
+        <div class="envelope" id="envelope">
+          <div class="envelope-flap" id="envelope-flap"></div>
+          <div class="envelope-pocket"></div>
+          <div class="envelope-seal" id="envelope-seal" title="Kliknij, aby otworzyć!">
+            <span class="seal-heart">❤️</span>
+            <span class="seal-text">DOTKNIJ</span>
+          </div>
+
+          <!-- Sam papier z listem -->
+          <div class="letter-paper" id="letter-paper">
+            <div class="letter-inner">
+              <h3 class="letter-title" id="letter-title">Hejka Oliwka... ❤️</h3>
+              <div class="letter-body" id="letter-body">
+                <!-- Wstrzykiwane z config.js -->
+              </div>
+              <div class="letter-signature" id="letter-signature">
+                Na zawsze Twój ❤️
+              </div>
+              <button class="btn btn-primary letter-send-love-btn" id="letter-love-btn">
+                Odeślij buziaka! 💋✨
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SEKCJA 3: GALERIA WSPOMNIEŃ -->
+    <section id="gallery" class="section glass-card">
+      <div class="section-header">
+        <span class="section-tag">Nasze Chwile</span>
+        <h2>Galeria Wspomnień 📸</h2>
+        <p class="section-description">Miejsce na wszystkie nasze najcudowniejsze momenty</p>
+      </div>
+
+      <div class="gallery-grid" id="gallery-grid">
+        <!-- Generowane z config.js -->
+      </div>
+    </section>
+
+    <!-- SEKCJA 4: INTERAKTYWNY MINI-QUIZ O WAS -->
+    <section id="quiz" class="section glass-card">
+      <div class="section-header">
+        <span class="section-tag">Sprawdźmy się!</span>
+        <h2>Oficjalny Quiz o Nas 🤔💖</h2>
+        <p class="section-description">Myślisz, że znasz wszystkie poprawne odpowiedzi? Sprawdźmy to!</p>
+      </div>
+
+      <div class="quiz-container" id="quiz-container">
+        <div class="quiz-progress-bar">
+          <div class="quiz-progress-fill" id="quiz-progress"></div>
+        </div>
+
+        <div class="quiz-step-info">
+          <span id="quiz-step-text">Pytanie 1 z 4</span>
+          <span class="quiz-score-badge" id="quiz-score-badge">Wynik: 0 pkt</span>
+        </div>
+
+        <div class="quiz-card" id="quiz-card">
+          <h3 class="quiz-question" id="quiz-question-text">Pytanie...</h3>
+          <div class="quiz-options-list" id="quiz-options">
+            <!-- Wstrzykiwane przez JS -->
+          </div>
+          <div class="quiz-feedback hidden" id="quiz-feedback">
+            <span class="feedback-icon" id="feedback-icon">🎉</span>
+            <p class="feedback-text" id="feedback-text">Komentarz</p>
+            <button class="btn btn-primary next-btn" id="quiz-next-btn">Kolejne pytanie ➔</button>
+          </div>
+        </div>
+
+        <!-- Ekran końcowy quizu -->
+        <div class="quiz-result hidden" id="quiz-result">
+          <div class="trophy-glow">👑</div>
+          <h3 class="result-title">Test Zakończony Sukcesem!</h3>
+          <p class="result-subtitle">Oficjalnie mianowana na <strong>Najlepszą Dziewczynę na Świecie</strong></p>
+          <div class="result-score" id="result-score-display">Wynik: 4/4 (100%)</div>
+          <p class="result-cheer" id="result-cheer-text">Od wczoraj i na zawsze tworzymy idealny team! ❤️</p>
+          <button class="btn btn-primary" id="quiz-restart-btn">Zagraj jeszcze raz 🔄</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- STOPKA -->
+    <footer class="site-footer">
+      <div class="footer-heart-shower">
+        <button class="btn btn-secondary heart-shower-btn" id="shower-hearts-btn">
+          Spuść deszcz serduszek! 🌧️💖
+        </button>
+      </div>
+      <p class="footer-text">
+        Stworzone specjalnie dla <strong id="footer-name">Oliwii</strong> z nieskończoną ilością miłości ❤️
+      </p>
+      <p class="footer-sub">Oficjalnie razem od <span id="footer-date">04.09.2026</span> ✨</p>
+    </footer>
+  </main>
+
+  <!-- MODAL LIGHTBOX DLA ZDJĘĆ -->
+  <div class="lightbox-modal hidden" id="lightbox-modal">
+    <div class="lightbox-backdrop" id="lightbox-backdrop"></div>
+    <div class="lightbox-content">
+      <button class="lightbox-close" id="lightbox-close">✕</button>
+      <img src="" alt="Powiększone zdjęcie" id="lightbox-img">
+      <p class="lightbox-caption" id="lightbox-caption"></p>
+    </div>
+  </div>
+
+  <!-- Skrypty -->
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

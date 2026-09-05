@@ -1,0 +1,13 @@
+# Miejsce na Wasze zdjęcia! 📸
+
+Wrzuć tutaj Wasze wspólne zdjęcia, np.:
+- `nasze1.jpg`
+- `nasze2.jpg`
+- `oliwia.jpg`
+
+A następnie w pliku `config.js` w sekcji `gallery` podmień adresy `url` na ścieżki do tych zdjęć, np.:
+```javascript
+url: "assets/nasze1.jpg",
+caption: "Nasza pierwsza randka ❤️",
+date: "Wczoraj"
+```
