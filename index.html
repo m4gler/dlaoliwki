@@ -7,19 +7,31 @@
   <meta name="description" content="Wyjątkowa, interaktywna strona stworzona z miłością dla Oliwii.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Dancing+Script:wght@600;700&family=Outfit:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
 </head>
 <body>
-  <!-- Tło z interaktywnymi cząsteczkami canvas -->
+  <!-- Tło: świetlne sfery ambient i cząsteczki canvas -->
+  <div class="ambient-glow orb-1"></div>
+  <div class="ambient-glow orb-2"></div>
+  <div class="ambient-glow orb-3"></div>
   <canvas id="bg-canvas"></canvas>
 
-  <!-- Pływające przyciski kontrolne (dźwięk, serduszko) -->
+  <!-- Pływające przyciski kontrolne (muzyka, serduszko) -->
   <div class="floating-controls">
-    <button id="sound-btn" class="control-btn" title="Efekty dźwiękowe">
-      <span class="icon" id="sound-icon">🔊</span>
-    </button>
+    <div class="music-player-group" id="music-player-group">
+      <button id="sound-btn" class="control-btn music-btn" title="Włącz / Zatrzymaj muzykę">
+        <span class="icon" id="sound-icon">🎵</span>
+        <span class="music-label" id="music-label">Airplanes</span>
+        <span class="equalizer-bars" id="equalizer-bars">
+          <span></span><span></span><span></span>
+        </span>
+      </button>
+      <button id="next-track-btn" class="control-btn mini-btn" title="Następna piosenka">
+        <span class="icon">⏭️</span>
+      </button>
+    </div>
     <button id="floating-heart-btn" class="control-btn heart-btn" title="Wyślij serduszko!">
       <span class="icon">💖</span>
       <span class="heart-counter" id="total-hearts-count">0</span>
@@ -29,21 +41,12 @@
   <main class="content-wrapper">
     <!-- SEKCJA HERO -->
     <header class="hero-section">
-      <div class="badge-pill">
-        <span class="pulse-dot"></span>
-        <span id="hero-badge">Od wczoraj oficjalnie razem ✨</span>
-      </div>
-      
       <h1 class="neon-title" id="main-title">
         Dla <span class="gradient-text">Oliwii</span> <span class="heart-glow">❤️</span>
       </h1>
-      
-      <p class="hero-subtitle" id="main-subtitle">
-        Nasza wspólna historia zaczyna się właśnie teraz...
-      </p>
 
       <div class="hero-cta-group">
-        <a href="#counter" class="btn btn-primary">Zobacz nasz czas ⏳</a>
+        <a href="#counter" class="btn btn-primary">Ile jesteśmy razem ⏳</a>
         <a href="#letter" class="btn btn-secondary">Otwórz list 💌</a>
       </div>
     </header>
@@ -51,7 +54,7 @@
     <!-- SEKCJA 1: LICZNIK CZASU RAZEM -->
     <section id="counter" class="section glass-card">
       <div class="section-header">
-        <span class="section-tag">Nasz Wspólny Czas</span>
+        <span class="section-tag">Ile jesteśmy razem</span>
         <h2>Jesteśmy razem już przez:</h2>
       </div>
 
@@ -80,7 +83,7 @@
 
       <div class="counter-footer-text">
         <span class="sparkle">✨</span>
-        <span id="counter-live-message">I z każdą uciekającą sekundą lubię Cię coraz bardziej!</span>
+        <span id="counter-live-message">Krótko, ale każdy od czegoś zaczynał...</span>
         <span class="sparkle">✨</span>
       </div>
     </section>
@@ -89,7 +92,7 @@
     <section id="letter" class="section">
       <div class="section-header">
         <span class="section-tag">Wiadomość z serca</span>
-        <h2>List tylko dla Twoich oczu 💌</h2>
+        <h2>List dla Ciebie 💌</h2>
         <p class="section-description">Kliknij w kopertę, aby złamać pieczęć i przeczytać wiadomość</p>
       </div>
 
@@ -104,17 +107,32 @@
 
           <!-- Sam papier z listem -->
           <div class="letter-paper" id="letter-paper">
+            <button class="letter-close-btn" id="letter-close-btn" title="Schowaj list do koperty">✕</button>
+            <div class="letter-stamp-badge">
+              <span class="stamp-postmark">AIR MAIL ★ 2026</span>
+              <div class="vintage-stamp">
+                <span class="stamp-icon">🌹</span>
+                <span class="stamp-val">LOVE</span>
+              </div>
+            </div>
+
             <div class="letter-inner">
               <h3 class="letter-title" id="letter-title">Hejka Oliwka... ❤️</h3>
               <div class="letter-body" id="letter-body">
                 <!-- Wstrzykiwane z config.js -->
               </div>
               <div class="letter-signature" id="letter-signature">
-                Na zawsze Twój ❤️
+                Maks ❤️
               </div>
-              <button class="btn btn-primary letter-send-love-btn" id="letter-love-btn">
-                Odeślij buziaka! 💋✨
-              </button>
+              <div class="letter-ps" id="letter-ps"></div>
+              <div class="letter-footer-actions">
+                <button class="btn btn-primary letter-send-love-btn" id="letter-love-btn">
+                  Odeślij buziaka! 💋✨
+                </button>
+                <button class="btn-text letter-fold-btn" id="letter-fold-btn">
+                  Złóż list z powrotem ✉️
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -126,7 +144,12 @@
       <div class="section-header">
         <span class="section-tag">Nasze Chwile</span>
         <h2>Galeria Wspomnień 📸</h2>
-        <p class="section-description">Miejsce na wszystkie nasze najcudowniejsze momenty</p>
+        <p class="section-description">Miejsce na nasze najlepsze momenty</p>
+        <div class="gallery-actions">
+          <button class="btn btn-secondary add-memory-btn" id="open-memory-modal-btn">
+            <span class="btn-icon">✨</span> Dodaj wspomnienie 📸
+          </button>
+        </div>
       </div>
 
       <div class="gallery-grid" id="gallery-grid">
@@ -183,10 +206,6 @@
           Spuść deszcz serduszek! 🌧️💖
         </button>
       </div>
-      <p class="footer-text">
-        Stworzone specjalnie dla <strong id="footer-name">Oliwii</strong> z nieskończoną ilością miłości ❤️
-      </p>
-      <p class="footer-sub">Oficjalnie razem od <span id="footer-date">04.09.2026</span> ✨</p>
     </footer>
   </main>
 
@@ -195,8 +214,56 @@
     <div class="lightbox-backdrop" id="lightbox-backdrop"></div>
     <div class="lightbox-content">
       <button class="lightbox-close" id="lightbox-close">✕</button>
-      <img src="" alt="Powiększone zdjęcie" id="lightbox-img">
+      <button class="lightbox-nav-btn prev" id="lightbox-prev" aria-label="Poprzednie zdjęcie">❮</button>
+      <div class="lightbox-media-wrapper">
+        <img src="" alt="Powiększone zdjęcie" id="lightbox-img">
+        <span class="lightbox-counter" id="lightbox-counter">1 / 1</span>
+      </div>
+      <button class="lightbox-nav-btn next" id="lightbox-next" aria-label="Następne zdjęcie">❯</button>
       <p class="lightbox-caption" id="lightbox-caption"></p>
+    </div>
+  </div>
+
+  <!-- MODAL DODAWANIA WSPOMNIENIA -->
+  <div class="modal hidden" id="memory-modal" role="dialog" aria-modal="true" aria-labelledby="memory-modal-title">
+    <div class="modal-backdrop" id="memory-backdrop"></div>
+    <div class="modal-dialog glass-card">
+      <button class="modal-close" id="memory-modal-close" aria-label="Zamknij">✕</button>
+      <div class="modal-header">
+        <span class="section-tag">Nasza Chwila</span>
+        <h3 id="memory-modal-title">Dodaj nowe wspomnienie 📸💕</h3>
+        <p class="modal-subtitle">Wgraj zdjęcie i napisz kilka słów, żeby ta chwila została z nami na zawsze!</p>
+      </div>
+      <form id="memory-form" class="memory-form">
+        <!-- Pole wyboru pliku / dropzone -->
+        <div class="file-upload-zone" id="file-drop-zone">
+          <input type="file" id="memory-file-input" accept="image/*" class="file-input-hidden">
+          <div class="upload-placeholder" id="upload-placeholder">
+            <span class="upload-icon">📷</span>
+            <span class="upload-text">Kliknij lub przeciągnij tutaj zdjęcie</span>
+            <span class="upload-hint">Obsługuje zdjęcia z telefonu i komputera (JPG, PNG, WEBP)</span>
+          </div>
+          <div class="upload-preview hidden" id="upload-preview">
+            <img src="" alt="Podgląd zdjęcia" id="preview-img">
+            <button type="button" class="btn btn-secondary btn-sm btn-change-img" id="change-img-btn">Zmień zdjęcie</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="memory-caption">Co to była za chwila? / Twój podpis ❤️</label>
+          <textarea id="memory-caption" placeholder="np. Nasze wyjście na lody, wieczorny spacer, śmieszna sytuacja..." rows="3" required></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="memory-date">Data lub notatka (opcjonalnie) 🗓️</label>
+          <input type="text" id="memory-date" placeholder="np. Dzisiaj, 05.09.2026 albo Tamten piątek">
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" id="memory-cancel-btn">Anuluj</button>
+          <button type="submit" class="btn btn-primary" id="memory-submit-btn">Zapisz wspomnienie 💖</button>
+        </div>
+      </form>
     </div>
   </div>
 

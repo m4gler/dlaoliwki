@@ -5,24 +5,44 @@
 
 window.CONFIG = {
   // Imię i nagłówki
-  herName: "Oliwia",
+  herName: "Oliwii",
   title: "Dla Oliwii ✨",
-  subtitle: "Nasza wspólna historia zaczyna się właśnie teraz...",
+  counterMessage: "Krótko, ale każdy od czegoś zaczynał...",
 
   // DATA ROZPOCZĘCIA ZWIĄZKU (Format: RRRR-MM-DDTHH:MM:SS)
   // Wczorajsza data (możesz zmienić dokładną godzinę, np. '2026-09-04T20:00:00')
   startDate: "2026-09-04T20:00:00",
 
+  // MUZYKA W TLE (Airplanes gra jako pierwsze!)
+  music: [
+    {
+      title: "Airplanes ✈️",
+      fullTitle: "B.o.B - Airplanes (feat. Hayley Williams)",
+      src: "assets/airplanes.m4a"
+    },
+    {
+      title: "Stereo Hearts 📻",
+      fullTitle: "Gym Class Heroes - Stereo Hearts (ft. Adam Levine)",
+      src: "assets/stereo_hearts.m4a"
+    },
+    {
+      title: "Self Aware 🎧",
+      fullTitle: "Temper City - Self Aware",
+      src: "assets/self_aware.m4a"
+    }
+  ],
+
   // WIRTUALNY LIST / WIADOMOŚĆ
   letter: {
     title: "Hejka Oliwka... ❤️",
     paragraphs: [
-      "Wiem, że to dopiero sam początek naszej wspólnej drogi, ale już teraz wiem, że każda chwila spędzona z Tobą ma w sobie niesamowitą magię.",
-      "Twój uśmiech potrafi rozjaśnić nawet najbardziej pochmurny dzień, a rozmowy z Tobą mijają w ułamku sekundy. Cieszę się niesamowicie, że od wczoraj możemy mówić o sobie 'MY'.",
-      "Stworzyłem tę stronę specjalnie dla Ciebie, żebyś w każdej chwili mogła zerknąć, jak bije nasz wspólny licznik i przypomnieć sobie, jak bardzo jesteś dla mnie wyjątkowa.",
-      "Przed nami cała masa wspólnych wspomnień, podróży, śmiechu i przygód. Nie mogę się doczekać każdego kolejnego dnia z Tobą! 🥰"
+      "Wiem, że to dopiero początek naszej wspólnej drogi, ale każda chwila z Tobą od samego początku jest po prostu zajebista.",
+      "Tak naprawdę już od pierwszego spotkania bardzo chciałem, żeby wyszło z tego coś znacznie więcej niż tylko zwykła znajomość. Masz przepiękny uśmiech, który jak tylko zobaczę, potrafi rozjaśnić nawet najbardziej pochmurny dzień.",
+      "Spotkania i rozmowy z Tobą zlatują dosłownie w ułamku sekundy, bo przy nikim innym tak super mi się nie rozmawia. Stworzyłem tę stronę specjalnie dla nas, żebyśmy w każdej chwili mogli zerknąć, jak bije nasz licznik i jak szybko leci nam ten czas spędzony razem.",
+      "Mam ogromną nadzieję, że ta nasza wspólna droga będzie po prostu cudowna – pełna kolejnych przygód, wspólnych wspomnień i co najważniejsze... całej masy uśmiechu! 🥰"
     ],
-    sign: "Na zawsze Twój ❤️"
+    sign: "Maks ❤️",
+    ps: "P.S. Zerknij na piosenki w prawym górnym rogu – wybrałem 3, które najbardziej kojarzą mi się z Tobą haha! I zobacz też koniecznie naszą galerię wspomnień poniżej 🎶📸"
   },
 
   // GALERIA ZDJĘĆ
@@ -30,9 +50,9 @@ window.CONFIG = {
   // Domyślnie ustawione są klimatyczne grafiki ilustracyjne
   gallery: [
     {
-      url: "https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=800&auto=format&fit=crop&q=80",
-      caption: "Początek czegoś niezwykłego ✨",
-      date: "Wczoraj"
+      url: "assets/yyyy_fairs.png",
+      caption: "yyyy fairs",
+      date: ""
     },
     {
       url: "assets/pierwsze_zdjecie.jpg",
@@ -40,62 +60,89 @@ window.CONFIG = {
       date: "Początki ✨"
     },
     {
-      url: "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=800&auto=format&fit=crop&q=80",
-      caption: "Wspólne wieczory i rozmowy do rana 🌙",
-      date: "Każdy dzień"
+      url: "assets/manekin.jpg",
+      caption: "To było chyba po twoim zdaniu egzaminu wewnętrznego. Wziąłem sobie złego naleśnika a tobie wziąłem herbatę 🤨",
+      date: ""
     },
     {
-      url: "https://images.unsplash.com/photo-1494774157365-9e04c6720e47?w=800&auto=format&fit=crop&q=80",
-      caption: "Tylko Ty i ja przeciwko całemu światu 💫",
-      date: "Przyszłość"
+      url: "assets/dart.jpg",
+      caption: "Pamiętam była lampa jak chuj. Tutaj dart i pokazałaś mi tego chińczyka",
+      date: ""
+    },
+    {
+      url: "assets/naleczow1.jpg",
+      images: [
+        "assets/naleczow1.jpg",
+        "assets/naleczow2.jpg",
+        "assets/naleczow3.jpg",
+        "assets/naleczow4.jpg",
+        "assets/naleczow5.jpg"
+      ],
+      caption: "Pojechaliśmy do Nałęczowa coś około po półtorej tygodnia od darta. Nałęczów zasysa ale z tobą było fajnie. yy najlepsza pizza w mieście u PAWŁOWSKICH",
+      date: ""
+    },
+    {
+      url: "assets/jarmark.jpg",
+      caption: "Tu był ten jarmark bodajże. Pamiętam jakąś sekte co walczyli żeby panśtwa G7 czegoś tam nie robiły. Szkoda że nie medytowaliśmy razem z nimi. Jedzenie z chiszy wywołuje u mnie rewolucje żołądkowe😔",
+      date: ""
+    },
+    {
+      url: "assets/randka1.jpg",
+      images: [
+        "assets/randka1.jpg",
+        "assets/randka2.jpg",
+        "assets/randka3.jpg"
+      ],
+      caption: "Pierwsza taka w sumie poważna randka. było zajebiście. I w sumie no można by powiedzieć, że tutaj zaczął się nasz związek😉",
+      date: ""
     }
   ],
 
   // MINI-QUIZ O WAS
   quiz: [
     {
-      question: "Kto z nas dwojga częściej patrzy na drugą osobę maślanym wzrokiem? 👀",
+      question: "Jaką kobietę trafiłem we wczorajszym blind boxie z UFC? 🥊",
       options: [
-        "Zdecydowanie ja (chłopak)",
-        "Oliwia, chociaż próbuje to ukryć",
-        "Oboje równo – nie da się oderwać wzroku!",
-        "Tylko jak jest jedzenie w pobliżu"
+        "Joanna Jędrzejczyk",
+        "Amanda Nunes",
+        "Ronda Rousey",
+        "Valentina Shevchenko"
       ],
-      correctIndex: 2,
-      comment: "Dokładnie! Nie da się na siebie nie patrzeć! 😍"
+      correctIndex: 1,
+      comment: "Dokładnie tak – Amanda Nunes! 🦁🥊"
     },
     {
-      question: "Jaka jest oficjalna supermoc Oliwii? 🦸‍♀️",
+      question: "W jaki dzień oficjalnie się poznaliśmy? 🗓️✨",
       options: [
-        "Rozczulanie mnie jednym spojrzeniem",
-        "Bycie najcudowniejszą osobą pod słońcem",
-        "Wybieranie filmów przez godzinę",
-        "Wszystkie powyższe (szczególnie dwie pierwsze!)"
+        "16 lipca",
+        "17 lipca",
+        "18 lipca",
+        "19 lipca"
       ],
-      correctIndex: 3,
-      comment: "Oczywiście, że wszystkie! Zwłaszcza to z rozczulaniem! 🥺✨"
+      correctIndex: 1,
+      comment: "Dokładnie 17 lipca! Pamiętasz idealnie! 🥰❤️"
     },
     {
-      question: "Jaki jest nasz wspólny plan na najbliższy czas? 🚀",
+      question: "Jakiego dnia odbyło się nasze pierwsze spotkanie? ☕✨",
       options: [
-        "Jedzenie dużej ilości dobrego jedzonka",
-        "Kolejne niesamowite randki i przygody",
-        "Kolekcjonowanie wspólnych wspomnień",
-        "Wszystko naraz i jeszcze więcej!"
+        "19 lipca",
+        "20 lipca",
+        "21 lipca",
+        "22 lipca"
       ],
-      correctIndex: 3,
-      comment: "Bingo! Przed nami najlepszy czas! 🎉"
+      correctIndex: 1,
+      comment: "Dokładnie 20 lipca! Tego dnia nie da się zapomnieć! 🥰❤️"
     },
     {
-      question: "Od kiedy oficjalnie tworzymy najlepszy duet na świecie? 🏆",
+      question: "Jaka jest moja ulubiona kuchnia? (proste!) 🍕🍝",
       options: [
-        "Od wczoraj!",
-        "Od zawsze w gwiazdach",
-        "Od pierwszego wejrzenia",
-        "Wszystkie odpowiedzi są poprawne ❤️"
+        "Azjatycka",
+        "Włoska",
+        "Gruzińska",
+        "Amerykańska"
       ],
-      correctIndex: 3,
-      comment: "To było przeznaczenie! 🥂❤️"
+      correctIndex: 1,
+      comment: "Oczywiście, że włoska! Pizza i makaron ponad wszystko! 🍕❤️"
     }
   ]
 };
