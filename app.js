@@ -215,21 +215,27 @@ document.addEventListener('DOMContentLoaded', () => {
       }, 200);
     }
   }
+  function fetchWithTimeout(promise, ms = 2500) {
+    return Promise.race([
+      promise,
+      new Promise((_, reject) => setTimeout(() => reject(new Error('Supabase request timeout')), ms))
+    ]);
+  }
   async function fetchGlobalHearts() {
     if (supabaseClient) {
       try {
-        const { data } = await supabaseClient
-          .from('hearts')
-          .select('count')
-          .eq('id', 1)
-          .single();
+        const res = await fetchWithTimeout(
+          supabaseClient.from('hearts').select('count').eq('id', 1).single(),
+          2500
+        );
+        const data = res && res.data;
         if (data && typeof data.count === 'number') {
           totalHearts = data.count;
           updateHeartsUI();
           return;
         }
       } catch (e) {
-        console.warn('Supabase hearts fetch error:', e);
+        console.warn('Supabase hearts fetch error/timeout:', e);
       }
     }
     try {
@@ -248,9 +254,10 @@ document.addEventListener('DOMContentLoaded', () => {
     heartSaveDebounce = setTimeout(async () => {
       if (supabaseClient) {
         try {
-          await supabaseClient
-            .from('hearts')
-            .upsert({ id: 1, count: totalHearts });
+          await fetchWithTimeout(
+            supabaseClient.from('hearts').upsert({ id: 1, count: totalHearts }),
+            2500
+          );
         } catch (e) {
           console.warn('Supabase hearts save error:', e);
         }
@@ -337,55 +344,67 @@ document.addEventListener('DOMContentLoaded', () => {
   const DB_VERSION = 1;
   const STORE_NAME = 'memories';
   function openMemoriesDB() {
-    return new Promise((resolve, reject) => {
-      if (!window.indexedDB) {
-        resolve(null);
-        return;
-      }
-      const req = indexedDB.open(DB_NAME, DB_VERSION);
-      req.onupgradeneeded = (e) => {
-        const db = e.target.result;
-        if (!db.objectStoreNames.contains(STORE_NAME)) {
-          db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
+    return new Promise((resolve) => {
+      try {
+        if (!window.indexedDB) {
+          resolve(null);
+          return;
         }
-      };
-      req.onsuccess = () => resolve(req.result);
-      req.onerror = () => {
-        console.warn('IndexedDB niedostępne:', req.error);
+        const req = indexedDB.open(DB_NAME, DB_VERSION);
+        req.onupgradeneeded = (e) => {
+          try {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains(STORE_NAME)) {
+              db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
+            }
+          } catch (err) {
+            resolve(null);
+          }
+        };
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => resolve(null);
+      } catch (e) {
+        console.warn('IndexedDB niedostępne:', e);
         resolve(null);
-      };
+      }
     });
   }
   async function getStoredMemories() {
     if (supabaseClient) {
       try {
-        const { data, error } = await supabaseClient
-          .from('memories')
-          .select('*')
-          .order('id', { ascending: true });
+        const res = await fetchWithTimeout(
+          supabaseClient.from('memories').select('*').order('id', { ascending: true }),
+          2500
+        );
+        const data = res && res.data;
+        const error = res && res.error;
         if (!error && Array.isArray(data)) {
           return data.map(m => ({
             id: m.id,
-            url: m.url,
-            caption: m.caption,
+            url: m.url || m.image_url || m.src || '',
+            caption: m.caption || m.text || m.title || '',
             date: m.date || '',
             author: m.author || '',
             images: m.images || null
           }));
         }
       } catch (e) {
-        console.warn('Supabase memories fetch error, fallback do lokalu:', e);
+        console.warn('Supabase memories fetch error/timeout, fallback do lokalu:', e);
       }
     }
     try {
       const db = await openMemoriesDB();
       if (db) {
         const items = await new Promise((resolve) => {
-          const tx = db.transaction(STORE_NAME, 'readonly');
-          const store = tx.objectStore(STORE_NAME);
-          const req = store.getAll();
-          req.onsuccess = () => resolve(req.result || []);
-          req.onerror = () => resolve([]);
+          try {
+            const tx = db.transaction(STORE_NAME, 'readonly');
+            const store = tx.objectStore(STORE_NAME);
+            const req = store.getAll();
+            req.onsuccess = () => resolve(req.result || []);
+            req.onerror = () => resolve([]);
+          } catch (err) {
+            resolve([]);
+          }
         });
         if (Array.isArray(items)) return items;
       }
