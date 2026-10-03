@@ -5,11 +5,12 @@ Interaktywna, nowoczesna strona internetowa w klimacie **Dark Neon / Cyber-Roman
 ---
 
 ## 🌟 Co zawiera strona?
-1. **Licznik Waszego Czasu (Live Counter)** – odmierza dni, godziny, minuty i sekundy odkąd jesteście parą (od wczoraj).
-2. **Wirtualny List Miłosny (Koperta 3D)** – animowana pieczęć, otwieranie koperty, osobista wiadomość i przycisk "Odeślij buziaka".
-3. **Galeria Wspomnień (Polaroid Glow)** – neonowe kafelki z powiększeniem (lightbox) na pełny ekran.
-4. **Interaktywny Mini-Quiz o Was** – pytania, natychmiastowe reakcje, dźwięki i uroczy certyfikat na koniec z konfetti!
-5. **Efekty specjalne** – unoszące się neonowe cząsteczki i serduszka w tle, dźwięki (syntezator Web Audio bez zewnętrznych plików), licznik klikniętych serduszek oraz deszcz serduszek.
+1. **Ekran Powitalny z Wielkim Serem ❤️** – przed wejściem na stronę Oliwia klika "Otwórz niespodziankę", po czym pojawia się wielkie pulsowanie serce z napisem **"Kocham cię"**, konfetti i 5-sekundowe odliczanie do wejścia!
+2. **Licznik Waszego Czasu (Live Counter)** – odmierza dni, godziny, minuty i sekundy odkąd jesteście parą ("O kurde miesiąc...").
+3. **Wirtualny List Miłosny (Koperta 3D)** – animowana pieczęć, otwieranie koperty, osobista wiadomość i przycisk "Odeślij buziaka".
+4. **Galeria Wspomnień (Polaroid Glow)** – neonowe kafelki z powiększeniem (lightbox) na pełny ekran oraz opcja dodawania własnych zdjęć.
+5. **Słoiczek Powodów 🫙✨** – interaktywne losowanie uroczych wiadomości i powodów, dla których Oliwia jest wyjątkowa!
+6. **Efekty specjalne** – unoszące się neonowe cząsteczki i serduszka w tle, dźwięki (syntezator Web Audio), odtwarzacz muzyki, licznik serduszek oraz deszcz serduszek.
 
 ---
 
@@ -22,8 +23,8 @@ Wystarczy dwa razy kliknąć plik **`index.html`** – otworzy się od razu w Tw
 Wszystkie dane znajdują się w pliku **`config.js`**. Możesz go otworzyć w Notatniku lub edytorze kodu:
 - **Dokładna data i godzina**: zmień `startDate: "2026-09-04T20:00:00"` na dokładny moment, w którym zostaliście parą.
 - **Treść listu**: zmień akapity w sekcji `letter.paragraphs`.
-- **Zdjęcia**: wrzuć zdjęcia do folderu `assets/` i wpisz ścieżkę do nich w `gallery` (np. `url: "assets/nasze1.jpg"`).
-- **Pytania quizowe**: dodaj lub zmień pytania i opcje w sekcji `quiz`.
+- **Zdjęcia**: wrzuć zdjęcia do folderu `assets/` i wpisz ścieżkę do nich w `gallery`.
+- **Słoiczek powodów**: dopisuj i edytuj swoje teksty w sekcji `loveNotes`.
 
 ---
 

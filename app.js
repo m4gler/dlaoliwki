@@ -6,6 +6,22 @@ document.addEventListener('DOMContentLoaded', () => {
   const config = window.CONFIG || {};
 
   // ---------------------------------------------------------------------------
+  // SUPABASE CLIENT INITIALIZATION (ZAPIS W CZASIE RZECZYWISTYM)
+  // ---------------------------------------------------------------------------
+  const SUPABASE_URL = config.supabaseUrl;
+  const SUPABASE_KEY = config.supabaseKey;
+  let supabaseClient = null;
+
+  if (window.supabase && SUPABASE_URL && SUPABASE_KEY) {
+    try {
+      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      console.log('⚡ Supabase pomyślnie połączony!');
+    } catch (e) {
+      console.warn('Błąd inicjalizacji Supabase:', e);
+    }
+  }
+
+  // ---------------------------------------------------------------------------
   // 1. INICJALIZACJA DANYCH Z CONFIG
   // ---------------------------------------------------------------------------
   const herName = config.herName || "Oliwia";
@@ -138,121 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ---------------------------------------------------------------------------
-  // 2. ODTWARZACZ MUZYKI W TLE I PLAYLISTA
-  // ---------------------------------------------------------------------------
-  const playlist = (config.music && config.music.length > 0) ? config.music : [
-    { title: "Airplanes ✈️", src: "assets/airplanes.m4a" },
-    { title: "Stereo Hearts 📻", src: "assets/stereo_hearts.m4a" },
-    { title: "Self Aware 🎧", src: "assets/self_aware.m4a" }
-  ];
 
-  let currentTrackIdx = 0;
-  let isMusicPlaying = false;
-  let hasUserPaused = false;
-  let userInteracted = false;
-
-  const bgAudio = new Audio();
-  bgAudio.preload = 'auto';
-  bgAudio.volume = 0.65;
-
-  const soundBtn = document.getElementById('sound-btn');
-  const soundIcon = document.getElementById('sound-icon');
-  const musicLabel = document.getElementById('music-label');
-  const equalizerBars = document.getElementById('equalizer-bars');
-  const nextTrackBtn = document.getElementById('next-track-btn');
-
-  function updatePlayerUI() {
-    const track = playlist[currentTrackIdx];
-    if (musicLabel && track) {
-      musicLabel.textContent = track.title || 'Muzyka';
-      if (soundBtn) soundBtn.title = `Odtwarzaj / Pauza: ${track.fullTitle || track.title}`;
-    }
-    if (soundIcon) {
-      soundIcon.textContent = isMusicPlaying ? '⏸️' : '▶️';
-    }
-    if (equalizerBars) {
-      if (isMusicPlaying) {
-        equalizerBars.classList.add('playing');
-      } else {
-        equalizerBars.classList.remove('playing');
-      }
-    }
-  }
-
-  function loadTrack(index) {
-    currentTrackIdx = (index + playlist.length) % playlist.length;
-    const track = playlist[currentTrackIdx];
-    bgAudio.src = track.src;
-    updatePlayerUI();
-  }
-
-  function playTrack(index) {
-    if (typeof index === 'number' && index !== currentTrackIdx) {
-      loadTrack(index);
-    }
-    initAudio();
-    bgAudio.play().then(() => {
-      isMusicPlaying = true;
-      hasUserPaused = false;
-      updatePlayerUI();
-    }).catch(e => {
-      console.log('Autoplay request:', e);
-    });
-  }
-
-  function pauseTrack() {
-    bgAudio.pause();
-    isMusicPlaying = false;
-    hasUserPaused = true;
-    updatePlayerUI();
-  }
-
-  function toggleMusic() {
-    if (isMusicPlaying) {
-      pauseTrack();
-    } else {
-      playTrack(currentTrackIdx);
-    }
-  }
-
-  function nextTrack() {
-    playPopSound();
-    loadTrack(currentTrackIdx + 1);
-    playTrack(currentTrackIdx);
-  }
-
-  // Pierwsza piosenka: Airplanes (indeks 0)
-  loadTrack(0);
-
-  // Po skończeniu piosenki - odtwarzaj następną
-  bgAudio.addEventListener('ended', () => {
-    nextTrack();
-  });
-
-  if (soundBtn) {
-    soundBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      userInteracted = true;
-      toggleMusic();
-    });
-  }
-
-  if (nextTrackBtn) {
-    nextTrackBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      userInteracted = true;
-      nextTrack();
-    });
-  }
-
-  // Autostart Airplanes przy pierwszej interakcji ze stroną
-  document.addEventListener('pointerdown', () => {
-    if (!userInteracted && !isMusicPlaying && !hasUserPaused) {
-      userInteracted = true;
-      playTrack(0);
-    }
-  }, { once: true });
 
   // ---------------------------------------------------------------------------
   // 3. LICZNIK CZASU RAZEM (Na żywo co sekundę)
@@ -353,12 +255,12 @@ document.addEventListener('DOMContentLoaded', () => {
   // 5. OBSŁUGA SERDUSZEK I KONFETTI
   // ---------------------------------------------------------------------------
   let totalHearts = 0;
+  let heartSaveDebounce = null;
   const heartsCounterEl = document.getElementById('total-hearts-count');
   const floatingHeartBtn = document.getElementById('floating-heart-btn');
   const showerHeartsBtn = document.getElementById('shower-hearts-btn');
 
-  function incrementHearts(amount = 1) {
-    totalHearts += amount;
+  function updateHeartsUI() {
     if (heartsCounterEl) {
       heartsCounterEl.textContent = totalHearts;
       heartsCounterEl.style.transform = 'scale(1.3)';
@@ -367,6 +269,54 @@ document.addEventListener('DOMContentLoaded', () => {
       }, 200);
     }
   }
+
+  async function fetchGlobalHearts() {
+    if (supabaseClient) {
+      try {
+        const { data } = await supabaseClient
+          .from('hearts')
+          .select('count')
+          .eq('id', 1)
+          .single();
+        if (data && typeof data.count === 'number') {
+          totalHearts = data.count;
+          updateHeartsUI();
+          return;
+        }
+      } catch (e) {
+        console.warn('Supabase hearts fetch error:', e);
+      }
+    }
+    const stored = localStorage.getItem('oliwka_total_hearts');
+    if (stored) {
+      totalHearts = parseInt(stored, 10) || 0;
+      updateHeartsUI();
+    }
+  }
+
+  function saveGlobalHearts() {
+    localStorage.setItem('oliwka_total_hearts', totalHearts);
+    if (heartSaveDebounce) clearTimeout(heartSaveDebounce);
+    heartSaveDebounce = setTimeout(async () => {
+      if (supabaseClient) {
+        try {
+          await supabaseClient
+            .from('hearts')
+            .upsert({ id: 1, count: totalHearts });
+        } catch (e) {
+          console.warn('Supabase hearts save error:', e);
+        }
+      }
+    }, 400);
+  }
+
+  function incrementHearts(amount = 1) {
+    totalHearts += amount;
+    updateHeartsUI();
+    saveGlobalHearts();
+  }
+
+  fetchGlobalHearts();
 
   function fireHeartConfetti() {
     if (typeof confetti === 'function') {
@@ -475,6 +425,28 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function getStoredMemories() {
+    if (supabaseClient) {
+      try {
+        const { data, error } = await supabaseClient
+          .from('memories')
+          .select('*')
+          .order('id', { ascending: true });
+        
+        if (!error && Array.isArray(data)) {
+          return data.map(m => ({
+            id: m.id,
+            url: m.url,
+            caption: m.caption,
+            date: m.date || '',
+            author: m.author || '',
+            images: m.images || null
+          }));
+        }
+      } catch (e) {
+        console.warn('Supabase memories fetch error, fallback do lokalu:', e);
+      }
+    }
+
     const db = await openMemoriesDB();
     if (!db) {
       try {
@@ -498,6 +470,31 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function saveStoredMemory(item) {
+    if (supabaseClient) {
+      try {
+        const payload = {
+          url: item.url,
+          caption: item.caption,
+          date: item.date || '',
+          author: item.author || '',
+          images: item.images || null
+        };
+        const { data, error } = await supabaseClient
+          .from('memories')
+          .insert([payload])
+          .select();
+        
+        if (!error && data && data[0]) {
+          console.log('Wspomnienie pomyślnie zapisane w chmurze Supabase!');
+          return data[0];
+        } else {
+          console.warn('Supabase insert memories error:', error);
+        }
+      } catch (e) {
+        console.warn('Supabase insert error, fallback do lokalu:', e);
+      }
+    }
+
     const db = await openMemoriesDB();
     if (!db) {
       try {
@@ -524,6 +521,17 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function deleteStoredMemory(id) {
+    if (supabaseClient) {
+      try {
+        await supabaseClient
+          .from('memories')
+          .delete()
+          .eq('id', id);
+      } catch (e) {
+        console.warn('Supabase delete error:', e);
+      }
+    }
+
     const db = await openMemoriesDB();
     if (!db) {
       try {
@@ -610,6 +618,11 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
       ` : '';
 
+      const authorClass = (item.author || '').toLowerCase().includes('oliwia') ? 'author-oliwia' : 'author-maks';
+      const authorHtml = item.author 
+        ? `<span class="polaroid-author-badge ${authorClass}">👤 ${escapeHTML(item.author)}</span>` 
+        : '';
+
       return `
         <div class="polaroid-card ${hasMultiple ? 'has-multiple' : ''}" data-index="${index}">
           ${deleteBtnHtml}
@@ -619,7 +632,10 @@ document.addEventListener('DOMContentLoaded', () => {
             ${dotsHtml}
           </div>
           <p class="polaroid-caption">${item.caption || ''}</p>
-          <span class="polaroid-date">${item.date || ''}</span>
+          <div class="polaroid-footer-row">
+            <span class="polaroid-date">${item.date || ''}</span>
+            ${authorHtml}
+          </div>
         </div>
       `;
     }).join('');
@@ -892,11 +908,14 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       const dateVal = (memoryDateInput ? memoryDateInput.value : '').trim();
+      const memoryAuthorInput = document.getElementById('memory-author');
+      const authorVal = memoryAuthorInput ? memoryAuthorInput.value : 'Maks ❤️';
 
       const newMemory = {
         url: stagedImageDataUrl,
         caption: captionVal,
         date: dateVal,
+        author: authorVal,
         createdAt: Date.now()
       };
 
@@ -946,6 +965,95 @@ document.addEventListener('DOMContentLoaded', () => {
   // Startowe załadowanie galerii
   renderGallery();
 
+  // --- OBSŁUGA EKSPORTU I IMPORTU WSPOMNIEŃ (DLA MAKS & OLIWII) ---
+  const exportMemoriesBtn = document.getElementById('export-memories-btn');
+  const importMemoriesBtn = document.getElementById('import-memories-btn');
+  const importJsonInput = document.getElementById('import-json-input');
+
+  if (exportMemoriesBtn) {
+    exportMemoriesBtn.addEventListener('click', async () => {
+      const memories = await getStoredMemories();
+      const bucketList = getBucketList();
+
+      const exportData = {
+        version: 1,
+        createdAt: new Date().toISOString(),
+        memories: memories,
+        bucketList: bucketList
+      };
+
+      const jsonStr = JSON.stringify(exportData, null, 2);
+      const blob = new Blob([jsonStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `oliwka_dane_${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      playSuccessSound();
+    });
+  }
+
+  if (importMemoriesBtn && importJsonInput) {
+    importMemoriesBtn.addEventListener('click', () => {
+      importJsonInput.click();
+    });
+
+    importJsonInput.addEventListener('change', async (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = async (event) => {
+        try {
+          const importedData = JSON.parse(event.target.result);
+          let memoriesCount = 0;
+          let bucketCount = 0;
+
+          if (Array.isArray(importedData)) {
+            for (const item of importedData) {
+              if (item.url && item.caption) {
+                await saveStoredMemory(item);
+                memoriesCount++;
+              }
+            }
+          } else if (importedData && typeof importedData === 'object') {
+            if (Array.isArray(importedData.memories)) {
+              for (const item of importedData.memories) {
+                if (item.url && item.caption) {
+                  await saveStoredMemory(item);
+                  memoriesCount++;
+                }
+              }
+            }
+            if (Array.isArray(importedData.bucketList)) {
+              saveBucketList(importedData.bucketList);
+              bucketCount = importedData.bucketList.length;
+            }
+          } else {
+            alert('Nieprawidłowy format pliku!');
+            return;
+          }
+
+          await renderGallery();
+          renderBucketList();
+          playSuccessSound();
+          fireHeartConfetti();
+          alert(`Pomyślnie zaimportowano! ❤️✨\nWspomnienia: ${memoriesCount}, Marzenia: ${bucketCount}`);
+        } catch (err) {
+          console.error(err);
+          alert('Wystąpił błąd podczas importowania pliku.');
+        } finally {
+          importJsonInput.value = '';
+        }
+      };
+      reader.readAsText(file);
+    });
+  }
+
   document.addEventListener('keydown', (e) => {
     if (lightbox && !lightbox.classList.contains('hidden')) {
       if (e.key === 'Escape') closeLightbox();
@@ -973,132 +1081,126 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ---------------------------------------------------------------------------
-  // 7. INTERAKTYWNY QUIZ O WAS
+  // 0. EKRAN WEJŚCIOWY / SPLASH INTRO Z ANIMOWANYM SERCEM I LICZNIKIEM 5S
   // ---------------------------------------------------------------------------
-  const quizList = config.quiz || [];
-  let currentQuizStep = 0;
-  let quizScore = 0;
+  const entryOverlay = document.getElementById('entry-overlay');
+  const entryStep1 = document.getElementById('entry-step-1');
+  const entryStep2 = document.getElementById('entry-step-2');
+  const entryStartBtn = document.getElementById('entry-start-btn');
+  const entryTimerCount = document.getElementById('entry-timer-count');
 
-  const progressFill = document.getElementById('quiz-progress');
-  const stepText = document.getElementById('quiz-step-text');
-  const scoreBadge = document.getElementById('quiz-score-badge');
-  const questionText = document.getElementById('quiz-question-text');
-  const optionsList = document.getElementById('quiz-options');
-  const feedbackBox = document.getElementById('quiz-feedback');
-  const feedbackIcon = document.getElementById('feedback-icon');
-  const feedbackText = document.getElementById('feedback-text');
-  const nextBtn = document.getElementById('quiz-next-btn');
-  const quizCard = document.getElementById('quiz-card');
-  const quizResult = document.getElementById('quiz-result');
-  const resultScoreDisplay = document.getElementById('result-score-display');
-  const restartBtn = document.getElementById('quiz-restart-btn');
+  let entryCountdownTimer = null;
+  let hasEntered = false;
 
-  function renderQuizStep() {
-    if (!quizList.length) return;
+  function dismissEntryScreen() {
+    if (hasEntered) return;
+    hasEntered = true;
+    if (entryCountdownTimer) clearInterval(entryCountdownTimer);
 
-    if (currentQuizStep >= quizList.length) {
-      showQuizResults();
-      return;
+    if (entryOverlay) {
+      entryOverlay.style.transition = 'opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s ease';
+      entryOverlay.style.opacity = '0';
+      entryOverlay.style.transform = 'scale(1.05)';
+      setTimeout(() => {
+        entryOverlay.style.display = 'none';
+      }, 800);
     }
-
-    const currentQ = quizList[currentQuizStep];
-
-    // Pasek postępu
-    const progressPercent = ((currentQuizStep + 1) / quizList.length) * 100;
-    if (progressFill) progressFill.style.width = `${progressPercent}%`;
-
-    if (stepText) stepText.textContent = `Pytanie ${currentQuizStep + 1} z ${quizList.length}`;
-    if (scoreBadge) scoreBadge.textContent = `Wynik: ${quizScore} pkt`;
-
-    if (questionText) questionText.textContent = currentQ.question;
-
-    if (optionsList) {
-      optionsList.innerHTML = '';
-      currentQ.options.forEach((optText, index) => {
-        const btn = document.createElement('button');
-        btn.className = 'quiz-option-btn';
-        const letter = ['A', 'B', 'C', 'D'][index] || '';
-        btn.innerHTML = `<span class="opt-letter">${letter}</span><span class="opt-text">${optText}</span>`;
-        btn.addEventListener('click', () => handleOptionClick(index, currentQ));
-        optionsList.appendChild(btn);
-      });
-    }
-
-    if (feedbackBox) feedbackBox.classList.add('hidden');
   }
 
-  function handleOptionClick(selectedIndex, currentQ) {
+  function startEntrySequence() {
     initAudio();
-    const buttons = optionsList.querySelectorAll('.quiz-option-btn');
-    buttons.forEach(btn => btn.disabled = true);
+    playMagicSound();
 
-    const isCorrect = selectedIndex === currentQ.correctIndex;
+    if (entryStep1) entryStep1.classList.add('hidden');
+    if (entryStep2) entryStep2.classList.remove('hidden');
 
-    if (isCorrect) {
-      buttons[selectedIndex].classList.add('correct');
-      quizScore += 1;
-      playSuccessSound();
-      if (feedbackIcon) feedbackIcon.textContent = '🎉';
-      if (feedbackText) feedbackText.textContent = currentQ.comment || "Idealna odpowiedź! ❤️";
-    } else {
-      buttons[selectedIndex].classList.add('wrong');
-      buttons[currentQ.correctIndex].classList.add('correct');
-      playWrongSound();
-      if (feedbackIcon) feedbackIcon.textContent = '🤭';
-      if (feedbackText) feedbackText.textContent = `Prawie! ${currentQ.comment || ""}`;
-    }
+    fireHeartConfetti();
 
-    if (scoreBadge) scoreBadge.textContent = `Wynik: ${quizScore} pkt`;
-    if (feedbackBox) feedbackBox.classList.remove('hidden');
+    let secondsLeft = 5;
+    if (entryTimerCount) entryTimerCount.textContent = secondsLeft;
+
+    entryCountdownTimer = setInterval(() => {
+      secondsLeft--;
+      if (entryTimerCount) entryTimerCount.textContent = secondsLeft;
+      if (secondsLeft <= 0) {
+        clearInterval(entryCountdownTimer);
+        dismissEntryScreen();
+      }
+    }, 1000);
   }
 
-  if (nextBtn) {
-    nextBtn.addEventListener('click', () => {
-      playPopSound();
-      currentQuizStep++;
-      renderQuizStep();
+  if (entryStartBtn) {
+    entryStartBtn.addEventListener('click', startEntrySequence);
+  }
+
+  const giantHeartClickable = document.getElementById('giant-heart-clickable');
+  if (giantHeartClickable) {
+    giantHeartClickable.addEventListener('click', (e) => {
+      e.stopPropagation();
+      fireHeartConfetti();
+      playMagicSound();
+      incrementHearts(10);
+      setTimeout(() => {
+        dismissEntryScreen();
+      }, 400);
     });
   }
 
-  function showQuizResults() {
-    if (quizCard) quizCard.classList.add('hidden');
-    if (quizResult) quizResult.classList.remove('hidden');
+  if (entryStep2) {
+    entryStep2.addEventListener('click', () => {
+      dismissEntryScreen();
+    });
+  }
 
-    const total = quizList.length;
-    const percent = Math.round((quizScore / total) * 100);
+  // ---------------------------------------------------------------------------
+  // 7. SŁOICZEK Z POWODAMI
+  // ---------------------------------------------------------------------------
+  const loveNotes = config.loveNotes || [
+    "Masz przepiękny uśmiech! 😊❤️",
+    "Rozmowy z Tobą zlatują w ułamku sekundy. ⏳✨"
+  ];
 
-    if (resultScoreDisplay) {
-      resultScoreDisplay.textContent = `Twój wynik: ${quizScore}/${total} (${percent}%)`;
-    }
+  const drawNoteBtn = document.getElementById('draw-note-btn');
+  const noteDisplayCard = document.getElementById('note-display-card');
+  const noteTextContent = document.getElementById('note-text-content');
+  const nextNoteBtn = document.getElementById('next-note-btn');
 
-    const cheerEl = document.getElementById('result-cheer-text');
-    if (cheerEl) {
-      if (percent === 100) {
-        cheerEl.textContent = "100% poprawnych odpowiedzi! Znasz naszą historię perfekcyjnie, jesteś najcudowniejsza! 🏆🥰❤️";
-      } else if (percent >= 75) {
-        cheerEl.textContent = "Prawie bezbłędnie! Znasz nas lepiej niż ktokolwiek inny na świecie! 🥰✨";
-      } else {
-        cheerEl.textContent = "Najważniejsze, że od teraz piszemy kolejne wspólne wspomnienia każdego dnia! 🥰❤️";
-      }
-    }
+  let lastNoteIdx = -1;
 
+  function drawRandomNote() {
+    if (!loveNotes.length) return;
+    initAudio();
     playMagicSound();
+
+    let randIdx;
+    do {
+      randIdx = Math.floor(Math.random() * loveNotes.length);
+    } while (loveNotes.length > 1 && randIdx === lastNoteIdx);
+    lastNoteIdx = randIdx;
+
+    if (drawNoteBtn) drawNoteBtn.classList.add('hidden');
+    if (noteDisplayCard) {
+      noteDisplayCard.classList.remove('hidden');
+      noteDisplayCard.style.animation = 'none';
+      void noteDisplayCard.offsetWidth; // Force reflow
+      noteDisplayCard.style.animation = 'fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1)';
+    }
+    if (noteTextContent) {
+      noteTextContent.textContent = loveNotes[randIdx];
+    }
     fireHeartConfetti();
   }
 
-  if (restartBtn) {
-    restartBtn.addEventListener('click', () => {
-      playPopSound();
-      currentQuizStep = 0;
-      quizScore = 0;
-      if (quizCard) quizCard.classList.remove('hidden');
-      if (quizResult) quizResult.classList.add('hidden');
-      renderQuizStep();
-    });
-  }
+  if (drawNoteBtn) drawNoteBtn.addEventListener('click', drawRandomNote);
+  if (nextNoteBtn) nextNoteBtn.addEventListener('click', drawRandomNote);
 
-  // Start quizu
-  renderQuizStep();
+  // ---------------------------------------------------------------------------
+  // 8. RULETKA RANDKOWA / GENERATOR POMYSŁÓW
+  // ---------------------------------------------------------------------------
+  const dateIdeas = config.dateIdeas || [
+    { text: "Wyjście na lody & spacer 🍦🌅", icon: "🍦" },
+    { text: "Maraton filmowy z pizzą 🎬🍕", icon: "🍿" }
+  ];
 
   // ---------------------------------------------------------------------------
   // 8. KOSMICZNE TŁO CZĄSTECZEK (CANVAS)
@@ -1187,8 +1289,194 @@ document.addEventListener('DOMContentLoaded', () => {
     // Dodawanie serduszek przy kliknięciu/dotknięciu tła
     window.addEventListener('click', (e) => {
       // Ignorujemy kliknięcia w przyciski i linki
-      if (e.target.closest('button') || e.target.closest('a') || e.target.closest('.envelope')) return;
+      if (e.target.closest('button') || e.target.closest('a') || e.target.closest('.envelope') || e.target.closest('.bucket-item')) return;
       incrementHearts(1);
     });
   }
+
+  // ---------------------------------------------------------------------------
+  // OBSŁUGA NASZEJ LISTY 📝✨ (Z SYNCHRONIZACJĄ SUPABASE)
+  // ---------------------------------------------------------------------------
+  const BUCKET_STORAGE_KEY = 'oliwia_bucket_list_v1';
+  const bucketListGrid = document.getElementById('bucket-list-grid');
+  const addBucketForm = document.getElementById('add-bucket-form');
+  const bucketInput = document.getElementById('bucket-input');
+
+  async function getBucketList() {
+    if (supabaseClient) {
+      try {
+        const { data, error } = await supabaseClient
+          .from('list_items')
+          .select('*')
+          .order('id', { ascending: true });
+
+        if (!error && Array.isArray(data) && data.length > 0) {
+          return data.map(item => ({
+            id: item.id,
+            title: item.title,
+            completed: Boolean(item.completed),
+            author: item.author || ''
+          }));
+        }
+      } catch (e) {
+        console.warn('Supabase fetch list error:', e);
+      }
+    }
+    try {
+      const stored = localStorage.getItem(BUCKET_STORAGE_KEY);
+      if (stored) return JSON.parse(stored);
+    } catch (e) {
+      console.error(e);
+    }
+    return config.bucketList || [];
+  }
+
+  function saveBucketListLocal(list) {
+    try {
+      localStorage.setItem(BUCKET_STORAGE_KEY, JSON.stringify(list));
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  async function renderBucketList() {
+    if (!bucketListGrid) return;
+    const items = await getBucketList();
+    bucketListGrid.innerHTML = '';
+
+    items.forEach((item, index) => {
+      const card = document.createElement('div');
+      card.className = `bucket-item ${item.completed ? 'completed' : ''}`;
+      
+      const authorClass = (item.author || '').toLowerCase().includes('oliwia') ? 'author-oliwia' : 'author-maks';
+      const authorBadge = item.author 
+        ? `<span class="bucket-author-tag ${authorClass}">👤 ${escapeHTML(item.author)}</span>` 
+        : '';
+
+      card.innerHTML = `
+        <div class="bucket-checkbox">${item.completed ? '✓' : ''}</div>
+        <div class="bucket-item-content">
+          <div class="bucket-title">${escapeHTML(item.title)}</div>
+          ${authorBadge}
+        </div>
+        <span class="bucket-status-badge">${item.completed ? 'Spełnione 🎉' : 'Do zrealizowania ⏳'}</span>
+        <button class="bucket-delete-btn" title="Usuń wpis" data-id="${item.id}" data-index="${index}">✕</button>
+      `;
+
+      card.addEventListener('click', async (e) => {
+        if (e.target.classList.contains('bucket-delete-btn')) {
+          e.stopPropagation();
+          await deleteBucketItem(item.id, index);
+          return;
+        }
+
+        const newCompleted = !item.completed;
+        item.completed = newCompleted;
+
+        if (supabaseClient) {
+          try {
+            await supabaseClient
+              .from('list_items')
+              .update({ completed: newCompleted })
+              .eq('id', item.id);
+          } catch (e) {
+            console.warn('Supabase update list item error:', e);
+          }
+        }
+
+        items[index].completed = newCompleted;
+        saveBucketListLocal(items);
+        await renderBucketList();
+
+        if (newCompleted) {
+          playSuccessSound();
+          fireHeartConfetti();
+        }
+      });
+
+      bucketListGrid.appendChild(card);
+    });
+  }
+
+  async function deleteBucketItem(id, index) {
+    if (supabaseClient) {
+      try {
+        await supabaseClient
+          .from('list_items')
+          .delete()
+          .eq('id', id);
+      } catch (e) {
+        console.warn('Supabase delete list item error:', e);
+      }
+    }
+    const items = await getBucketList();
+    const updated = items.filter(i => String(i.id) !== String(id));
+    saveBucketListLocal(updated);
+    await renderBucketList();
+  }
+
+  if (addBucketForm && bucketInput) {
+    addBucketForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const text = bucketInput.value.trim();
+      if (!text) return;
+
+      const bucketAuthorSelect = document.getElementById('bucket-author');
+      const authorVal = bucketAuthorSelect ? bucketAuthorSelect.value : 'Maks ❤️';
+
+      const newItem = {
+        title: text,
+        completed: false,
+        author: authorVal
+      };
+
+      if (supabaseClient) {
+        try {
+          const { data, error } = await supabaseClient
+            .from('list_items')
+            .insert([newItem])
+            .select();
+
+          if (!error && data && data[0]) {
+            console.log('Punkt pomyślnie dodany do Supabase!');
+          }
+        } catch (e) {
+          console.warn('Supabase add list item error:', e);
+        }
+      }
+
+      const items = await getBucketList();
+      items.push({ id: Date.now(), ...newItem });
+      saveBucketListLocal(items);
+      bucketInput.value = '';
+      await renderBucketList();
+      playMagicSound();
+      fireHeartConfetti();
+    });
+  }
+
+  // NASŁUCHIWACZ ZMIAN W CZASIE RZECZYWISTYM (REALTIME SYNCHRONIZATION)
+  if (supabaseClient) {
+    try {
+      supabaseClient
+        .channel('public-db-sync')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'memories' }, () => {
+          renderGallery();
+        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'list_items' }, () => {
+          renderBucketList();
+        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'hearts' }, (payload) => {
+          if (payload.new && typeof payload.new.count === 'number') {
+            totalHearts = payload.new.count;
+            updateHeartsUI();
+          }
+        })
+        .subscribe();
+    } catch (e) {
+      console.warn('Supabase realtime channel error:', e);
+    }
+  }
+
+  renderBucketList();
 });

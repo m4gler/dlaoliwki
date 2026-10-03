@@ -10,28 +10,48 @@
   <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Dancing+Script:wght@600;700&family=Outfit:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
+  <!-- EKRAN WEJŚCIOWY / SPLASH SCREEN Z ANIMOWANYM SERCEM -->
+  <div class="entry-overlay" id="entry-overlay">
+    <div class="entry-backdrop"></div>
+    
+    <!-- KROK 1: Przycisk otwarcia niespodzianki -->
+    <div class="entry-card glass-card" id="entry-step-1">
+      <span class="entry-badge">Strona dla Oliwii ✨</span>
+      <h2 class="entry-title">Mam dla Ciebie niespodziankę... ❤️</h2>
+      <p class="entry-subtitle">Kliknij poniżej, aby otworzyć stronę</p>
+      <button class="btn btn-primary btn-lg entry-start-btn" id="entry-start-btn">
+        Otwórz niespodziankę 💖✨
+      </button>
+    </div>
+
+    <!-- KROK 2: Wielkie animowane serce z "Kocham cię" i licznikiem 5s -->
+    <div class="entry-heart-screen hidden" id="entry-step-2">
+      <div class="giant-heart-wrapper" id="giant-heart-clickable" title="Kliknij, aby wysłać miłość! 💖">
+        <div class="giant-heart-glow-outer"></div>
+        <div class="giant-heart-glow"></div>
+        <div class="giant-heart-orbit"></div>
+        <div class="giant-heart-body">
+          <span class="giant-heart-text">Kocham cię</span>
+        </div>
+        <div class="heart-tap-hint">Dotknij serduszko! 💖</div>
+      </div>
+      <div class="entry-countdown-badge">
+        Wejście na stronę za <span id="entry-timer-count">5</span>s... ⏳
+      </div>
+    </div>
+  </div>
+
   <!-- Tło: świetlne sfery ambient i cząsteczki canvas -->
   <div class="ambient-glow orb-1"></div>
   <div class="ambient-glow orb-2"></div>
   <div class="ambient-glow orb-3"></div>
   <canvas id="bg-canvas"></canvas>
 
-  <!-- Pływające przyciski kontrolne (muzyka, serduszko) -->
+  <!-- Pływający przycisk serduszka -->
   <div class="floating-controls">
-    <div class="music-player-group" id="music-player-group">
-      <button id="sound-btn" class="control-btn music-btn" title="Włącz / Zatrzymaj muzykę">
-        <span class="icon" id="sound-icon">🎵</span>
-        <span class="music-label" id="music-label">Airplanes</span>
-        <span class="equalizer-bars" id="equalizer-bars">
-          <span></span><span></span><span></span>
-        </span>
-      </button>
-      <button id="next-track-btn" class="control-btn mini-btn" title="Następna piosenka">
-        <span class="icon">⏭️</span>
-      </button>
-    </div>
     <button id="floating-heart-btn" class="control-btn heart-btn" title="Wyślij serduszko!">
       <span class="icon">💖</span>
       <span class="heart-counter" id="total-hearts-count">0</span>
@@ -48,6 +68,8 @@
       <div class="hero-cta-group">
         <a href="#counter" class="btn btn-primary">Ile jesteśmy razem ⏳</a>
         <a href="#letter" class="btn btn-secondary">Otwórz list 💌</a>
+        <a href="#list" class="btn btn-secondary">Nasza Lista 📝</a>
+        <a href="#notes" class="btn btn-secondary">Słoiczek Powodów 🫙</a>
       </div>
     </header>
 
@@ -83,7 +105,7 @@
 
       <div class="counter-footer-text">
         <span class="sparkle">✨</span>
-        <span id="counter-live-message">Krótko, ale każdy od czegoś zaczynał...</span>
+        <span id="counter-live-message">O kurde miesiąc...</span>
         <span class="sparkle">✨</span>
       </div>
     </section>
@@ -146,9 +168,16 @@
         <h2>Galeria Wspomnień 📸</h2>
         <p class="section-description">Miejsce na nasze najlepsze momenty</p>
         <div class="gallery-actions">
-          <button class="btn btn-secondary add-memory-btn" id="open-memory-modal-btn">
+          <button class="btn btn-primary add-memory-btn" id="open-memory-modal-btn">
             <span class="btn-icon">✨</span> Dodaj wspomnienie 📸
           </button>
+          <button class="btn btn-secondary" id="export-memories-btn" title="Pobierz plik ze wszystkimi zapisanymi wspomnieniami">
+            Pobierz plik 📥
+          </button>
+          <button class="btn btn-secondary" id="import-memories-btn" title="Wgraj plik ze wspomnieniami">
+            Wgraj plik 📤
+          </button>
+          <input type="file" id="import-json-input" accept=".json" class="file-input-hidden">
         </div>
       </div>
 
@@ -157,45 +186,54 @@
       </div>
     </section>
 
-    <!-- SEKCJA 4: INTERAKTYWNY MINI-QUIZ O WAS -->
-    <section id="quiz" class="section glass-card">
+    <!-- SEKCJA 4: SŁOICZEK Z POWODAMI -->
+    <section id="notes" class="section glass-card">
       <div class="section-header">
-        <span class="section-tag">Sprawdźmy się!</span>
-        <h2>Oficjalny Quiz o Nas 🤔💖</h2>
-        <p class="section-description">Myślisz, że znasz wszystkie poprawne odpowiedzi? Sprawdźmy to!</p>
+        <span class="section-tag">Dla Ciebie</span>
+        <h2>Słoiczek Powodów 🫙✨</h2>
+        <p class="section-description">Losowe karteczki i małe powody, dla których jesteś absolutnie wyjątkowa</p>
       </div>
 
-      <div class="quiz-container" id="quiz-container">
-        <div class="quiz-progress-bar">
-          <div class="quiz-progress-fill" id="quiz-progress"></div>
+      <div class="jar-container">
+        <div class="jar-card" id="draw-note-btn" role="button" tabindex="0">
+          <div class="jar-icon">🫙✨</div>
+          <div class="jar-title">Wylosuj karteczkę miłości</div>
+          <div class="jar-subtitle">Kliknij słoiczek, aby wyciągnąć nową wiadomość! ❤️</div>
         </div>
 
-        <div class="quiz-step-info">
-          <span id="quiz-step-text">Pytanie 1 z 4</span>
-          <span class="quiz-score-badge" id="quiz-score-badge">Wynik: 0 pkt</span>
-        </div>
-
-        <div class="quiz-card" id="quiz-card">
-          <h3 class="quiz-question" id="quiz-question-text">Pytanie...</h3>
-          <div class="quiz-options-list" id="quiz-options">
-            <!-- Wstrzykiwane przez JS -->
-          </div>
-          <div class="quiz-feedback hidden" id="quiz-feedback">
-            <span class="feedback-icon" id="feedback-icon">🎉</span>
-            <p class="feedback-text" id="feedback-text">Komentarz</p>
-            <button class="btn btn-primary next-btn" id="quiz-next-btn">Kolejne pytanie ➔</button>
+        <div class="note-display-card hidden" id="note-display-card">
+          <span class="note-quote-icon">💌</span>
+          <p class="note-text" id="note-text-content">Twój uśmiech potrafi rozjaśnić nawet najbardziej pochmurny dzień...</p>
+          <div class="note-actions">
+            <button class="btn btn-primary btn-sm" id="next-note-btn">Wylosuj kolejny powód 🎲✨</button>
           </div>
         </div>
+      </div>
+    </section>
 
-        <!-- Ekran końcowy quizu -->
-        <div class="quiz-result hidden" id="quiz-result">
-          <div class="trophy-glow">👑</div>
-          <h3 class="result-title">Test Zakończony Sukcesem!</h3>
-          <p class="result-subtitle">Oficjalnie mianowana na <strong>Najlepszą Dziewczynę na Świecie</strong></p>
-          <div class="result-score" id="result-score-display">Wynik: 4/4 (100%)</div>
-          <p class="result-cheer" id="result-cheer-text">Od wczoraj i na zawsze tworzymy idealny team! ❤️</p>
-          <button class="btn btn-primary" id="quiz-restart-btn">Zagraj jeszcze raz 🔄</button>
+    <!-- SEKCJA 6: NASZA LISTA / WSPÓLNE MARZENIA -->
+    <section id="list" class="section glass-card">
+      <div class="section-header">
+        <span class="section-tag">Wspólna Lista</span>
+        <h2>Nasza Lista 📝✨</h2>
+        <p class="section-description">Rzeczy i przygody, które chcemy razem przeżyć! Odznaczaj punkty, kiedy je spełnimy ❤️</p>
+      </div>
+
+      <div class="bucket-container">
+        <div class="bucket-list" id="bucket-list-grid">
+          <!-- Wstrzykiwane z JS -->
         </div>
+
+        <form id="add-bucket-form" class="add-bucket-form">
+          <div class="bucket-input-group">
+            <select id="bucket-author" class="form-select bucket-author-select">
+              <option value="Maks ❤️">Maks ❤️</option>
+              <option value="Oliwia 💖">Oliwia 💖</option>
+            </select>
+            <input type="text" id="bucket-input" placeholder="Wpisz nowy punkt do listy... 🌟" required autocomplete="off">
+            <button type="submit" class="btn btn-primary">Dodaj do listy ➕✨</button>
+          </div>
+        </form>
       </div>
     </section>
 
@@ -252,6 +290,14 @@
         <div class="form-group">
           <label for="memory-caption">Co to była za chwila? / Twój podpis ❤️</label>
           <textarea id="memory-caption" placeholder="np. Nasze wyjście na lody, wieczorny spacer, śmieszna sytuacja..." rows="3" required></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="memory-author">Kto dodaje to wspomnienie? 👤</label>
+          <select id="memory-author" class="form-select">
+            <option value="Maks ❤️">Maks ❤️</option>
+            <option value="Oliwia 💖">Oliwia 💖</option>
+          </select>
         </div>
 
         <div class="form-group">
