@@ -232,14 +232,18 @@ document.addEventListener('DOMContentLoaded', () => {
         console.warn('Supabase hearts fetch error:', e);
       }
     }
-    const stored = localStorage.getItem('oliwka_total_hearts');
-    if (stored) {
-      totalHearts = parseInt(stored, 10) || 0;
-      updateHeartsUI();
-    }
+    try {
+      const stored = localStorage.getItem('oliwka_total_hearts');
+      if (stored) {
+        totalHearts = parseInt(stored, 10) || 0;
+        updateHeartsUI();
+      }
+    } catch (e) {}
   }
   function saveGlobalHearts() {
-    localStorage.setItem('oliwka_total_hearts', totalHearts);
+    try {
+      localStorage.setItem('oliwka_total_hearts', totalHearts);
+    } catch (e) {}
     if (heartSaveDebounce) clearTimeout(heartSaveDebounce);
     heartSaveDebounce = setTimeout(async () => {
       if (supabaseClient) {
@@ -950,19 +954,8 @@ document.addEventListener('DOMContentLoaded', () => {
   function startEntrySequence() {
     initAudio();
     playMagicSound();
-    if (entryStep1) entryStep1.classList.add('hidden');
-    if (entryStep2) entryStep2.classList.remove('hidden');
     fireHeartConfetti();
-    let secondsLeft = 5;
-    if (entryTimerCount) entryTimerCount.textContent = secondsLeft;
-    entryCountdownTimer = setInterval(() => {
-      secondsLeft--;
-      if (entryTimerCount) entryTimerCount.textContent = secondsLeft;
-      if (secondsLeft <= 0) {
-        clearInterval(entryCountdownTimer);
-        dismissEntryScreen();
-      }
-    }, 1000);
+    dismissEntryScreen();
   }
   if (entryStartBtn) {
     entryStartBtn.addEventListener('click', startEntrySequence);
@@ -1113,24 +1106,42 @@ document.addEventListener('DOMContentLoaded', () => {
           if (data.length > 0) {
             return data.map(item => ({
               id: item.id,
-              title: item.title,
+              title: item.title || item.text || item.content || item.name || '',
               completed: Boolean(item.completed),
               author: item.author || ''
             }));
           } else if (Array.isArray(config.bucketList) && config.bucketList.length > 0) {
             const seedItems = config.bucketList.map(item => ({
-              title: item.title,
+              title: item.title || item.text || '',
               completed: item.completed || false,
-              author: 'Maks ❤️'
+              author: item.author || 'Maks ❤️'
             }));
             const { data: seeded, error: seedErr } = await supabaseClient
               .from('list_items')
               .insert(seedItems)
               .select();
-            if (!seedErr && Array.isArray(seeded) && seeded.length > 0) {
+            if (seedErr) {
+              const seedItemsText = config.bucketList.map(item => ({
+                text: item.title || item.text || '',
+                completed: item.completed || false,
+                author: item.author || 'Maks ❤️'
+              }));
+              const { data: seeded2 } = await supabaseClient
+                .from('list_items')
+                .insert(seedItemsText)
+                .select();
+              if (Array.isArray(seeded2) && seeded2.length > 0) {
+                return seeded2.map(item => ({
+                  id: item.id,
+                  title: item.title || item.text || item.content || item.name || '',
+                  completed: Boolean(item.completed),
+                  author: item.author || ''
+                }));
+              }
+            } else if (Array.isArray(seeded) && seeded.length > 0) {
               return seeded.map(item => ({
                 id: item.id,
-                title: item.title,
+                title: item.title || item.text || item.content || item.name || '',
                 completed: Boolean(item.completed),
                 author: item.author || ''
               }));
@@ -1172,10 +1183,11 @@ document.addEventListener('DOMContentLoaded', () => {
       const authorBadge = item.author 
         ? `<span class="bucket-author-tag ${authorClass}">👤 ${escapeHTML(item.author)}</span>` 
         : '';
+      const displayTitle = item.title || item.text || item.content || item.name || '';
       card.innerHTML = `
         <div class="bucket-checkbox">${item.completed ? '✓' : ''}</div>
         <div class="bucket-item-content">
-          <div class="bucket-title">${escapeHTML(item.title)}</div>
+          <div class="bucket-title">${escapeHTML(displayTitle)}</div>
           ${authorBadge}
         </div>
         <span class="bucket-status-badge">${item.completed ? 'Spełnione 🎉' : 'Do zrealizowania ⏳'}</span>
@@ -1243,9 +1255,14 @@ document.addEventListener('DOMContentLoaded', () => {
       };
       if (supabaseClient) {
         try {
-          await supabaseClient
+          const { error: insErr } = await supabaseClient
             .from('list_items')
             .insert([newItem]);
+          if (insErr) {
+            await supabaseClient
+              .from('list_items')
+              .insert([{ text: text, completed: false, author: authorVal }]);
+          }
         } catch (e) {
           console.warn('Supabase add list item error:', e);
         }
