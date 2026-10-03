@@ -1,5 +1,4 @@
-
-document.addEventListener('DOMContentLoaded', () => {
+function initApp() {
   const config = window.CONFIG || {};
 
   function escapeHTML(str) {
@@ -1318,4 +1317,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
   renderBucketList();
-});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initApp);
+} else {
+  initApp();
+}
