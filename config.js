@@ -1,23 +1,10 @@
-// =============================================================================
-// KONFIGURACJA STRONY DLA OLIWII ❤️
-// Możesz tu łatwo zmienić dowolny tekst, datę, zdjęcia lub pytania w quizie!
-// =============================================================================
-
 window.CONFIG = {
-  // Imię i nagłówki
   herName: "Oliwii",
   title: "Dla Oliwii ✨",
   counterMessage: "O kurde miesiąc...",
-
-  // KONFIGURACJA CHMURY SUPABASE (ZAPIS W CZASIE RZECZYWISTYM NA WSZYSTKICH URZĄDZENIACH)
   supabaseUrl: "https://jsvurrvzfeihzvqrrity.supabase.co",
   supabaseKey: "sb_publishable_TKvMu0CB45-vNNSexyklIQ_zAUq2DDF",
-
-  // DATA ROZPOCZĘCIA ZWIĄZKU (Format: RRRR-MM-DDTHH:MM:SS)
-  // Wczorajsza data (możesz zmienić dokładną godzinę, np. '2026-09-04T20:00:00')
   startDate: "2026-09-04T20:00:00",
-
-  // WIRTUALNY LIST / WIADOMOŚĆ
   letter: {
     title: "Hejka Oliwka... ❤️",
     paragraphs: [
@@ -29,10 +16,6 @@ window.CONFIG = {
     sign: "Maks ❤️",
     ps: "P.S. Zobacz koniecznie naszą galerię wspomnień poniżej 📸✨"
   },
-
-  // GALERIA ZDJĘĆ
-  // Możesz wrzucić swoje zdjęcia do folderu 'assets/' i wpisać tu ich nazwy np. 'assets/nasze1.jpg'
-  // Domyślnie ustawione są klimatyczne grafiki ilustracyjne
   gallery: [
     {
       url: "assets/yyyy_fairs.png",
@@ -96,8 +79,6 @@ window.CONFIG = {
       date: "30.09.2026"
     }
   ],
-
-  // SŁOICZEK Z POWODAMI / ZŁOTE MYŚLI 🫙✨
   loveNotes: [
     "Masz przepiękny uśmiech, który potrafi rozświetlić nawet najbardziej pochmurny dzień! 😊❤️",
     "Rozmowy i czas z Tobą zlatują tak szybko, że chciałoby się zatrzymać zegar. ⏳✨",
@@ -106,8 +87,6 @@ window.CONFIG = {
     "Jesteś po prostu wyjątkowa i niesamowicie cieszę się, że się poznaliśmy! 🌟🥰",
     "Bo potrafisz sprawić, że zwykły dzień staje się wyjątkowy. 💕✨"
   ],
-
-  // RULETKA RANDKOWA / GENERATOR POMYSŁÓW 🎲✨
   dateIdeas: [
     { text: "Wyjście na pyszne lody & wieczorny spacer 🍦🌅", icon: "🍦" },
     { text: "Maraton filmowy z dużą pizzą & popcornem 🎬🍕", icon: "🍿" },
@@ -118,8 +97,6 @@ window.CONFIG = {
     { text: "Wieczór z planszówkami & ulubionym napojem 🍷🎲", icon: "🎲" },
     { text: "Wycieczka niespodzianka w nieznane miejsce 🗺️✨", icon: "✨" }
   ],
-
-  // NASZA LISTA / WSPÓLNE MARZENIA & CELE 📝✨
   bucketList: [
     { id: 1, title: "Pierwszy wspólny weekendowy wyjazd w góry lub nad morze 🏔️🌊", completed: false },
     { id: 2, title: "Nocne oglądanie gwiazd na kocu z gorącą czekoladą ✨☕", completed: false },
@@ -129,5 +106,3 @@ window.CONFIG = {
     { id: 6, title: "Niespodziankowy wyjazd w nieznane miasto bez żadnego planu 🚗💨", completed: false }
   ]
 };
-
-

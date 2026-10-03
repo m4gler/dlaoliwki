@@ -22,11 +22,8 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 </head>
 <body>
-  <!-- EKRAN WEJŚCIOWY / SPLASH SCREEN Z ANIMOWANYM SERCEM -->
   <div class="entry-overlay" id="entry-overlay">
     <div class="entry-backdrop"></div>
-    
-    <!-- KROK 1: Przycisk otwarcia niespodzianki -->
     <div class="entry-card glass-card" id="entry-step-1">
       <span class="entry-badge">Strona dla Oliwii ✨</span>
       <h2 class="entry-title">Mam dla Ciebie niespodziankę... ❤️</h2>
@@ -35,8 +32,6 @@
         Otwórz niespodziankę 💖✨
       </button>
     </div>
-
-    <!-- KROK 2: Wielkie animowane serce z "Kocham cię" i licznikiem 5s -->
     <div class="entry-heart-screen hidden" id="entry-step-2">
       <div class="giant-heart-wrapper" id="giant-heart-clickable" title="Kliknij, aby wysłać miłość! 💖">
         <div class="giant-heart-glow-outer"></div>
@@ -53,28 +48,21 @@
       </div>
     </div>
   </div>
-
-  <!-- Tło: świetlne sfery ambient i cząsteczki canvas -->
   <div class="ambient-glow orb-1"></div>
   <div class="ambient-glow orb-2"></div>
   <div class="ambient-glow orb-3"></div>
   <canvas id="bg-canvas"></canvas>
-
-  <!-- Pływający przycisk serduszka -->
   <div class="floating-controls">
     <button id="floating-heart-btn" class="control-btn heart-btn" title="Wyślij serduszko!">
       <span class="icon">💖</span>
       <span class="heart-counter" id="total-hearts-count">0</span>
     </button>
   </div>
-
   <main class="content-wrapper">
-    <!-- SEKCJA HERO -->
     <header class="hero-section">
       <h1 class="neon-title" id="main-title">
         Dla <span class="gradient-text">Oliwii</span> <span class="heart-glow">❤️</span>
       </h1>
-
       <div class="hero-cta-group">
         <a href="#counter" class="btn btn-primary">Ile jesteśmy razem ⏳</a>
         <a href="#letter" class="btn btn-secondary">Otwórz list 💌</a>
@@ -82,14 +70,11 @@
         <a href="#notes" class="btn btn-secondary">Słoiczek Powodów 🫙</a>
       </div>
     </header>
-
-    <!-- SEKCJA 1: LICZNIK CZASU RAZEM -->
     <section id="counter" class="section glass-card">
       <div class="section-header">
         <span class="section-tag">Ile jesteśmy razem</span>
         <h2>Jesteśmy razem już przez:</h2>
       </div>
-
       <div class="counter-grid">
         <div class="counter-card" id="card-days">
           <div class="counter-glow"></div>
@@ -112,22 +97,18 @@
           <div class="counter-label">Sekund</div>
         </div>
       </div>
-
       <div class="counter-footer-text">
         <span class="sparkle">✨</span>
         <span id="counter-live-message">O kurde miesiąc...</span>
         <span class="sparkle">✨</span>
       </div>
     </section>
-
-    <!-- SEKCJA 2: WIRTUALNY LIST / KOPERTA 3D -->
     <section id="letter" class="section">
       <div class="section-header">
         <span class="section-tag">Wiadomość z serca</span>
         <h2>List dla Ciebie 💌</h2>
         <p class="section-description">Kliknij w kopertę, aby złamać pieczęć i przeczytać wiadomość</p>
       </div>
-
       <div class="envelope-container" id="envelope-wrapper">
         <div class="envelope" id="envelope">
           <div class="envelope-flap" id="envelope-flap"></div>
@@ -136,8 +117,6 @@
             <span class="seal-heart">❤️</span>
             <span class="seal-text">DOTKNIJ</span>
           </div>
-
-          <!-- Sam papier z listem -->
           <div class="letter-paper" id="letter-paper">
             <button class="letter-close-btn" id="letter-close-btn" title="Schowaj list do koperty">✕</button>
             <div class="letter-stamp-badge">
@@ -147,11 +126,9 @@
                 <span class="stamp-val">LOVE</span>
               </div>
             </div>
-
             <div class="letter-inner">
               <h3 class="letter-title" id="letter-title">Hejka Oliwka... ❤️</h3>
               <div class="letter-body" id="letter-body">
-                <!-- Wstrzykiwane z config.js -->
               </div>
               <div class="letter-signature" id="letter-signature">
                 Maks ❤️
@@ -170,8 +147,6 @@
         </div>
       </div>
     </section>
-
-    <!-- SEKCJA 3: GALERIA WSPOMNIEŃ -->
     <section id="gallery" class="section glass-card">
       <div class="section-header">
         <span class="section-tag">Nasze Chwile</span>
@@ -190,27 +165,21 @@
           <input type="file" id="import-json-input" accept=".json" class="file-input-hidden">
         </div>
       </div>
-
       <div class="gallery-grid" id="gallery-grid">
-        <!-- Generowane z config.js -->
       </div>
     </section>
-
-    <!-- SEKCJA 4: SŁOICZEK Z POWODAMI -->
     <section id="notes" class="section glass-card">
       <div class="section-header">
         <span class="section-tag">Dla Ciebie</span>
         <h2>Słoiczek Powodów 🫙✨</h2>
         <p class="section-description">Losowe karteczki i małe powody, dla których jesteś absolutnie wyjątkowa</p>
       </div>
-
       <div class="jar-container">
         <div class="jar-card" id="draw-note-btn" role="button" tabindex="0">
           <div class="jar-icon">🫙✨</div>
           <div class="jar-title">Wylosuj karteczkę miłości</div>
           <div class="jar-subtitle">Kliknij słoiczek, aby wyciągnąć nową wiadomość! ❤️</div>
         </div>
-
         <div class="note-display-card hidden" id="note-display-card">
           <span class="note-quote-icon">💌</span>
           <p class="note-text" id="note-text-content">Twój uśmiech potrafi rozjaśnić nawet najbardziej pochmurny dzień...</p>
@@ -220,20 +189,15 @@
         </div>
       </div>
     </section>
-
-    <!-- SEKCJA 6: NASZA LISTA / WSPÓLNE MARZENIA -->
     <section id="list" class="section glass-card">
       <div class="section-header">
         <span class="section-tag">Wspólna Lista</span>
         <h2>Nasza Lista 📝✨</h2>
         <p class="section-description">Rzeczy i przygody, które chcemy razem przeżyć! Odznaczaj punkty, kiedy je spełnimy ❤️</p>
       </div>
-
       <div class="bucket-container">
         <div class="bucket-list" id="bucket-list-grid">
-          <!-- Wstrzykiwane z JS -->
         </div>
-
         <form id="add-bucket-form" class="add-bucket-form">
           <div class="bucket-input-group">
             <select id="bucket-author" class="form-select bucket-author-select">
@@ -246,8 +210,6 @@
         </form>
       </div>
     </section>
-
-    <!-- STOPKA -->
     <footer class="site-footer">
       <div class="footer-heart-shower">
         <button class="btn btn-secondary heart-shower-btn" id="shower-hearts-btn">
@@ -256,8 +218,6 @@
       </div>
     </footer>
   </main>
-
-  <!-- MODAL LIGHTBOX DLA ZDJĘĆ -->
   <div class="lightbox-modal hidden" id="lightbox-modal">
     <div class="lightbox-backdrop" id="lightbox-backdrop"></div>
     <div class="lightbox-content">
@@ -271,8 +231,6 @@
       <p class="lightbox-caption" id="lightbox-caption"></p>
     </div>
   </div>
-
-  <!-- MODAL DODAWANIA WSPOMNIENIA -->
   <div class="modal hidden" id="memory-modal" role="dialog" aria-modal="true" aria-labelledby="memory-modal-title">
     <div class="modal-backdrop" id="memory-backdrop"></div>
     <div class="modal-dialog glass-card">
@@ -283,7 +241,6 @@
         <p class="modal-subtitle">Wgraj zdjęcie i napisz kilka słów, żeby ta chwila została z nami na zawsze!</p>
       </div>
       <form id="memory-form" class="memory-form">
-        <!-- Pole wyboru pliku / dropzone -->
         <div class="file-upload-zone" id="file-drop-zone">
           <input type="file" id="memory-file-input" accept="image/*" class="file-input-hidden">
           <div class="upload-placeholder" id="upload-placeholder">
@@ -296,12 +253,10 @@
             <button type="button" class="btn btn-secondary btn-sm btn-change-img" id="change-img-btn">Zmień zdjęcie</button>
           </div>
         </div>
-
         <div class="form-group">
           <label for="memory-caption">Co to była za chwila? / Twój podpis ❤️</label>
           <textarea id="memory-caption" placeholder="np. Nasze wyjście na lody, wieczorny spacer, śmieszna sytuacja..." rows="3" required></textarea>
         </div>
-
         <div class="form-group">
           <label for="memory-author">Kto dodaje to wspomnienie? 👤</label>
           <select id="memory-author" class="form-select">
@@ -309,12 +264,10 @@
             <option value="Oliwia 💖">Oliwia 💖</option>
           </select>
         </div>
-
         <div class="form-group">
           <label for="memory-date">Data lub notatka (opcjonalnie) 🗓️</label>
           <input type="text" id="memory-date" placeholder="np. Dzisiaj, 05.09.2026 albo Tamten piątek">
         </div>
-
         <div class="form-actions">
           <button type="button" class="btn btn-secondary" id="memory-cancel-btn">Anuluj</button>
           <button type="submit" class="btn btn-primary" id="memory-submit-btn">Zapisz wspomnienie 💖</button>
@@ -322,8 +275,6 @@
       </form>
     </div>
   </div>
-
-  <!-- Skrypty -->
   <script src="config.js"></script>
   <script src="app.js"></script>
 </body>

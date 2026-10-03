@@ -1,17 +1,19 @@
-// =============================================================================
-// LOGIKA STRONY DLA OLIWII ❤️
-// =============================================================================
 
 document.addEventListener('DOMContentLoaded', () => {
   const config = window.CONFIG || {};
 
-  // ---------------------------------------------------------------------------
-  // SUPABASE CLIENT INITIALIZATION (ZAPIS W CZASIE RZECZYWISTYM)
-  // ---------------------------------------------------------------------------
+  function escapeHTML(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
   const SUPABASE_URL = config.supabaseUrl;
   const SUPABASE_KEY = config.supabaseKey;
   let supabaseClient = null;
-
   if (typeof window !== 'undefined' && window.supabase && typeof window.supabase.createClient === 'function' && SUPABASE_URL && SUPABASE_KEY) {
     try {
       supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -21,32 +23,22 @@ document.addEventListener('DOMContentLoaded', () => {
       supabaseClient = null;
     }
   }
-
-  // ---------------------------------------------------------------------------
-  // 1. INICJALIZACJA DANYCH Z CONFIG
-  // ---------------------------------------------------------------------------
   const herName = config.herName || "Oliwia";
   document.title = config.title || `Dla ${herName} ❤️`;
-  
   const titleEl = document.getElementById('main-title');
   if (titleEl) {
     titleEl.innerHTML = `Dla <span class="gradient-text">${herName}</span> <span class="heart-glow">❤️</span>`;
   }
-
   const subtitleEl = document.getElementById('main-subtitle');
   if (subtitleEl && config.subtitle) {
     subtitleEl.textContent = config.subtitle;
   }
-
   const counterMessageEl = document.getElementById('counter-live-message');
   if (counterMessageEl && config.counterMessage) {
     counterMessageEl.textContent = config.counterMessage;
   }
-
   const footerNameEl = document.getElementById('footer-name');
   if (footerNameEl) footerNameEl.textContent = herName;
-
-  // Data rozpoczęcia w stopce
   const footerDateEl = document.getElementById('footer-date');
   if (footerDateEl && config.startDate) {
     const startDateObj = new Date(config.startDate);
@@ -56,14 +48,11 @@ document.addEventListener('DOMContentLoaded', () => {
       year: 'numeric'
     });
   }
-
-  // Wypełnienie treści listu
   if (config.letter) {
     const letterTitle = document.getElementById('letter-title');
     const letterBody = document.getElementById('letter-body');
     const letterSignature = document.getElementById('letter-signature');
     const letterPs = document.getElementById('letter-ps');
-
     if (letterTitle && config.letter.title) {
       letterTitle.textContent = config.letter.title;
     }
@@ -84,13 +73,8 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
   }
-
-  // ---------------------------------------------------------------------------
-  // 2. SYNTEZATOR DŹWIĘKÓW (Całkowicie wyłączony)
-  // ---------------------------------------------------------------------------
   let soundEnabled = false;
   let audioCtx = null;
-
   function initAudio() {
     if (!audioCtx) {
       const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -102,35 +86,27 @@ document.addEventListener('DOMContentLoaded', () => {
       audioCtx.resume();
     }
   }
-
   function playTone(freq, type = 'sine', duration = 0.15, gainVal = 0.1) {
     if (!soundEnabled) return;
     initAudio();
     if (!audioCtx) return;
-
     try {
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
       osc.type = type;
       osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-
       gain.gain.setValueAtTime(gainVal, audioCtx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
-
       osc.connect(gain);
       gain.connect(audioCtx.destination);
-
       osc.start();
       osc.stop(audioCtx.currentTime + duration);
     } catch (e) {
-      // Ignorujemy błędy audio w trybie cichym przeglądarki
     }
   }
-
   function playPopSound() {
     playTone(520, 'sine', 0.1, 0.12);
   }
-
   function playSuccessSound() {
     if (!soundEnabled) return;
     initAudio();
@@ -138,14 +114,12 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => playTone(659.25, 'triangle', 0.12, 0.12), 80);  // E5
     setTimeout(() => playTone(783.99, 'triangle', 0.25, 0.15), 160); // G5
   }
-
   function playWrongSound() {
     if (!soundEnabled) return;
     initAudio();
     setTimeout(() => playTone(300, 'sawtooth', 0.15, 0.08), 0);
     setTimeout(() => playTone(240, 'sawtooth', 0.25, 0.08), 120);
   }
-
   function playMagicSound() {
     if (!soundEnabled) return;
     initAudio();
@@ -154,45 +128,28 @@ document.addEventListener('DOMContentLoaded', () => {
       setTimeout(() => playTone(freq, 'sine', 0.25, 0.08), idx * 60);
     });
   }
-
-
-
-  // ---------------------------------------------------------------------------
-  // 3. LICZNIK CZASU RAZEM (Na żywo co sekundę)
-  // ---------------------------------------------------------------------------
   const startDate = new Date(config.startDate || "2026-09-04T20:00:00");
   const daysEl = document.getElementById('count-days');
   const hoursEl = document.getElementById('count-hours');
   const minsEl = document.getElementById('count-minutes');
   const secsEl = document.getElementById('count-seconds');
-
   function updateCounter() {
     const now = new Date();
     let diff = Math.max(0, now.getTime() - startDate.getTime());
-
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
     diff -= days * (1000 * 60 * 60 * 24);
-
     const hours = Math.floor(diff / (1000 * 60 * 60));
     diff -= hours * (1000 * 60 * 60);
-
     const minutes = Math.floor(diff / (1000 * 60));
     diff -= minutes * (1000 * 60);
-
     const seconds = Math.floor(diff / 1000);
-
     if (daysEl) daysEl.textContent = days;
     if (hoursEl) hoursEl.textContent = String(hours).padStart(2, '0');
     if (minsEl) minsEl.textContent = String(minutes).padStart(2, '0');
     if (secsEl) secsEl.textContent = String(seconds).padStart(2, '0');
   }
-
   updateCounter();
   setInterval(updateCounter, 1000);
-
-  // ---------------------------------------------------------------------------
-  // 4. INTERAKTYWNA KOPERTA 3D / LIST
-  // ---------------------------------------------------------------------------
   const envelope = document.getElementById('envelope');
   const seal = document.getElementById('envelope-seal');
   const loveBtn = document.getElementById('letter-love-btn');
@@ -200,7 +157,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const letterFoldBtn = document.getElementById('letter-fold-btn');
   const letterPaper = document.getElementById('letter-paper');
   let hasOpenedEnvelope = false;
-
   function openEnvelope() {
     initAudio();
     if (envelope && !envelope.classList.contains('open')) {
@@ -212,7 +168,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
   }
-
   function closeEnvelope(e) {
     if (e) e.stopPropagation();
     if (envelope && envelope.classList.contains('open')) {
@@ -220,12 +175,10 @@ document.addEventListener('DOMContentLoaded', () => {
       playPopSound();
     }
   }
-
   if (seal) seal.addEventListener('click', (e) => {
     e.stopPropagation();
     openEnvelope();
   });
-
   if (envelope) {
     envelope.addEventListener('click', () => {
       if (!envelope.classList.contains('open')) {
@@ -233,16 +186,13 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
-
   if (letterPaper) {
     letterPaper.addEventListener('click', (e) => {
       e.stopPropagation();
     });
   }
-
   if (letterCloseBtn) letterCloseBtn.addEventListener('click', closeEnvelope);
   if (letterFoldBtn) letterFoldBtn.addEventListener('click', closeEnvelope);
-
   if (loveBtn) {
     loveBtn.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -251,16 +201,11 @@ document.addEventListener('DOMContentLoaded', () => {
       fireHeartConfetti();
     });
   }
-
-  // ---------------------------------------------------------------------------
-  // 5. OBSŁUGA SERDUSZEK I KONFETTI
-  // ---------------------------------------------------------------------------
   let totalHearts = 0;
   let heartSaveDebounce = null;
   const heartsCounterEl = document.getElementById('total-hearts-count');
   const floatingHeartBtn = document.getElementById('floating-heart-btn');
   const showerHeartsBtn = document.getElementById('shower-hearts-btn');
-
   function updateHeartsUI() {
     if (heartsCounterEl) {
       heartsCounterEl.textContent = totalHearts;
@@ -270,7 +215,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }, 200);
     }
   }
-
   async function fetchGlobalHearts() {
     if (supabaseClient) {
       try {
@@ -294,7 +238,6 @@ document.addEventListener('DOMContentLoaded', () => {
       updateHeartsUI();
     }
   }
-
   function saveGlobalHearts() {
     localStorage.setItem('oliwka_total_hearts', totalHearts);
     if (heartSaveDebounce) clearTimeout(heartSaveDebounce);
@@ -310,15 +253,12 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }, 400);
   }
-
   function incrementHearts(amount = 1) {
     totalHearts += amount;
     updateHeartsUI();
     saveGlobalHearts();
   }
-
   fetchGlobalHearts();
-
   function fireHeartConfetti() {
     if (typeof confetti === 'function') {
       confetti({
@@ -330,7 +270,6 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
   }
-
   if (floatingHeartBtn) {
     floatingHeartBtn.addEventListener('click', () => {
       playPopSound();
@@ -338,7 +277,6 @@ document.addEventListener('DOMContentLoaded', () => {
       fireHeartConfetti();
     });
   }
-
   if (showerHeartsBtn) {
     showerHeartsBtn.addEventListener('click', () => {
       playMagicSound();
@@ -363,10 +301,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
-
-  // ---------------------------------------------------------------------------
-  // 6. GALERIA ZDJĘĆ, INDEXTEDDB (DODAWANIE WSPOMNIEŃ PRZEZ OLIWIĘ) & LIGHTBOX
-  // ---------------------------------------------------------------------------
   const galleryGrid = document.getElementById('gallery-grid');
   const lightbox = document.getElementById('lightbox-modal');
   const lightboxImg = document.getElementById('lightbox-img');
@@ -376,8 +310,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const lightboxPrev = document.getElementById('lightbox-prev');
   const lightboxNext = document.getElementById('lightbox-next');
   const lightboxCounter = document.getElementById('lightbox-counter');
-
-  // Elementy modala dodawania wspomnienia
   const memoryModal = document.getElementById('memory-modal');
   const memoryModalClose = document.getElementById('memory-modal-close');
   const memoryBackdrop = document.getElementById('memory-backdrop');
@@ -392,18 +324,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const memoryCaptionInput = document.getElementById('memory-caption');
   const memoryDateInput = document.getElementById('memory-date');
   const openMemoryModalBtn = document.getElementById('open-memory-modal-btn');
-
   let activeCardIndex = 0;
   let activePhotoIndex = 0;
   let allGalleryItems = [];
   let multiPhotoTimers = [];
   let stagedImageDataUrl = null;
-
-  // --- OBSŁUGA BAZY DANYCH INDEXEDDB (trwały zapis w przeglądarce) ---
   const DB_NAME = 'OliwkaMemoriesDB';
   const DB_VERSION = 1;
   const STORE_NAME = 'memories';
-
   function openMemoriesDB() {
     return new Promise((resolve, reject) => {
       if (!window.indexedDB) {
@@ -424,7 +352,6 @@ document.addEventListener('DOMContentLoaded', () => {
       };
     });
   }
-
   async function getStoredMemories() {
     if (supabaseClient) {
       try {
@@ -432,7 +359,6 @@ document.addEventListener('DOMContentLoaded', () => {
           .from('memories')
           .select('*')
           .order('id', { ascending: true });
-        
         if (!error && Array.isArray(data)) {
           return data.map(m => ({
             id: m.id,
@@ -447,7 +373,6 @@ document.addEventListener('DOMContentLoaded', () => {
         console.warn('Supabase memories fetch error, fallback do lokalu:', e);
       }
     }
-
     try {
       const db = await openMemoriesDB();
       if (db) {
@@ -463,7 +388,6 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (e) {
       console.warn('IndexedDB fallback error:', e);
     }
-
     try {
       const fallback = localStorage.getItem('oliwka_custom_memories');
       return fallback ? JSON.parse(fallback) : [];
@@ -471,7 +395,6 @@ document.addEventListener('DOMContentLoaded', () => {
       return [];
     }
   }
-
   async function saveStoredMemory(item) {
     if (supabaseClient) {
       try {
@@ -486,7 +409,6 @@ document.addEventListener('DOMContentLoaded', () => {
           .from('memories')
           .insert([payload])
           .select();
-        
         if (!error && data && data[0]) {
           console.log('Wspomnienie pomyślnie zapisane w chmurze Supabase!');
           return data[0];
@@ -497,7 +419,6 @@ document.addEventListener('DOMContentLoaded', () => {
         console.warn('Supabase insert error, fallback do lokalu:', e);
       }
     }
-
     const db = await openMemoriesDB();
     if (!db) {
       try {
@@ -522,7 +443,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
-
   async function deleteStoredMemory(id) {
     if (supabaseClient) {
       try {
@@ -534,7 +454,6 @@ document.addEventListener('DOMContentLoaded', () => {
         console.warn('Supabase delete error:', e);
       }
     }
-
     const db = await openMemoriesDB();
     if (!db) {
       try {
@@ -556,8 +475,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
-
-  // --- KOMPRESJA ZDJĘCIA (aby działało błyskawicznie i mieściło się bez problemu) ---
   function compressImage(file, maxDimension = 1400, quality = 0.85) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -574,14 +491,11 @@ document.addEventListener('DOMContentLoaded', () => {
               height = maxDimension;
             }
           }
-
           const canvas = document.createElement('canvas');
           canvas.width = width;
           canvas.height = height;
           const ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0, width, height);
-
-          // Generujemy zoptymalizowany JPEG
           const dataUrl = canvas.toDataURL('image/jpeg', quality);
           resolve(dataUrl);
         };
@@ -592,21 +506,15 @@ document.addEventListener('DOMContentLoaded', () => {
       reader.readAsDataURL(file);
     });
   }
-
-  // --- RENDEROWANIE CAŁEJ GALERII (POCZĄTKOWE + WŁASNE WSPOMNIENIA OLIWII) ---
   async function renderGallery() {
     if (!galleryGrid) return;
-
     try {
-      // Czyścimy poprzednie timery karuzel
       multiPhotoTimers.forEach(timer => clearInterval(timer));
       multiPhotoTimers = [];
-
       const rawCustom = await getStoredMemories();
       const customMemories = Array.isArray(rawCustom) ? rawCustom : [];
       const baseGallery = Array.isArray(config.gallery) ? config.gallery : [];
       allGalleryItems = [...baseGallery, ...customMemories];
-
     let html = allGalleryItems.map((item, index) => {
       const isCustom = Boolean(item.id);
       const hasMultiple = Array.isArray(item.images) && item.images.length > 1;
@@ -622,12 +530,10 @@ document.addEventListener('DOMContentLoaded', () => {
           ${item.images.map((_, i) => `<span class="card-dot ${i === 0 ? 'active' : ''}"></span>`).join('')}
         </div>
       ` : '';
-
       const authorClass = (item.author || '').toLowerCase().includes('oliwia') ? 'author-oliwia' : 'author-maks';
       const authorHtml = item.author 
         ? `<span class="polaroid-author-badge ${authorClass}">👤 ${escapeHTML(item.author)}</span>` 
         : '';
-
       return `
         <div class="polaroid-card ${hasMultiple ? 'has-multiple' : ''}" data-index="${index}">
           ${deleteBtnHtml}
@@ -644,8 +550,6 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
       `;
     }).join('');
-
-    // Dodajemy interaktywny kafelek "+ Dodaj kolejne wspomnienie" na końcu galerii
     html += `
       <div class="polaroid-card add-card" id="grid-add-memory-card" role="button" tabindex="0" title="Dodaj nowe wspomnienie do galerii">
         <div class="add-card-icon">+</div>
@@ -653,16 +557,12 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="add-card-desc">Kliknij tutaj, aby wrzucić Wasze nowe wspólne zdjęcie i opis! 📸💕</div>
       </div>
     `;
-
     galleryGrid.innerHTML = html;
-
-    // Automatyczna rotacja zdjęć w kafelkach z wieloma zdjęciami
     allGalleryItems.forEach((item, index) => {
       if (Array.isArray(item.images) && item.images.length > 1) {
         let currentIdx = 0;
         const imgEl = document.getElementById(`card-img-${index}`);
         const dotsContainer = document.getElementById(`dots-card-${index}`);
-
         const timer = setInterval(() => {
           currentIdx = (currentIdx + 1) % item.images.length;
           if (imgEl) {
@@ -679,28 +579,20 @@ document.addEventListener('DOMContentLoaded', () => {
             });
           }
         }, 1800);
-
         multiPhotoTimers.push(timer);
       }
     });
-
-    // Obsługa kliknięcia kafelka galerii (otwarcie lightboxa)
     galleryGrid.querySelectorAll('.polaroid-card:not(.add-card)').forEach(card => {
       card.addEventListener('click', (e) => {
-        // Ignoruj kliknięcie w przycisk usuwania
         if (e.target.closest('.delete-memory-btn')) return;
         const idx = parseInt(card.getAttribute('data-index'), 10);
         openLightbox(idx, 0);
       });
     });
-
-    // Obsługa kliknięcia kafelka "+ Dodaj"
     const gridAddBtn = document.getElementById('grid-add-memory-card');
     if (gridAddBtn) {
       gridAddBtn.addEventListener('click', openMemoryModal);
     }
-
-    // Obsługa usuwania wspomnienia
     galleryGrid.querySelectorAll('.delete-memory-btn').forEach(btn => {
       btn.addEventListener('click', async (e) => {
         e.stopPropagation();
@@ -716,8 +608,6 @@ document.addEventListener('DOMContentLoaded', () => {
       console.error('renderGallery error:', e);
     }
   }
-
-  // --- OBSŁUGA LIGHTBOXA ---
   function openLightbox(cardIdx, photoIdx = 0) {
     if (!lightbox || !allGalleryItems[cardIdx]) return;
     activeCardIndex = cardIdx;
@@ -726,15 +616,12 @@ document.addEventListener('DOMContentLoaded', () => {
     lightbox.classList.remove('hidden');
     playPopSound();
   }
-
   function updateLightbox() {
     const item = allGalleryItems[activeCardIndex];
     if (!item) return;
-
     const hasMultiple = Array.isArray(item.images) && item.images.length > 1;
     const totalPhotos = hasMultiple ? item.images.length : 1;
     const currentSrc = hasMultiple ? item.images[activePhotoIndex] : item.url;
-
     if (lightboxImg) {
       lightboxImg.style.opacity = '0.3';
       setTimeout(() => {
@@ -742,11 +629,9 @@ document.addEventListener('DOMContentLoaded', () => {
         lightboxImg.style.opacity = '1';
       }, 120);
     }
-
     if (lightboxCaption) {
       lightboxCaption.textContent = item.caption || '';
     }
-
     if (lightboxCounter) {
       if (hasMultiple) {
         lightboxCounter.textContent = `${activePhotoIndex + 1} / ${totalPhotos}`;
@@ -756,16 +641,13 @@ document.addEventListener('DOMContentLoaded', () => {
         lightboxCounter.style.display = 'block';
       }
     }
-
     if (lightboxPrev) lightboxPrev.style.display = 'flex';
     if (lightboxNext) lightboxNext.style.display = 'flex';
   }
-
   function prevPhoto() {
     const item = allGalleryItems[activeCardIndex];
     if (!item) return;
     const hasMultiple = Array.isArray(item.images) && item.images.length > 1;
-
     if (hasMultiple) {
       activePhotoIndex = (activePhotoIndex - 1 + item.images.length) % item.images.length;
     } else {
@@ -775,12 +657,10 @@ document.addEventListener('DOMContentLoaded', () => {
     updateLightbox();
     playPopSound();
   }
-
   function nextPhoto() {
     const item = allGalleryItems[activeCardIndex];
     if (!item) return;
     const hasMultiple = Array.isArray(item.images) && item.images.length > 1;
-
     if (hasMultiple) {
       activePhotoIndex = (activePhotoIndex + 1) % item.images.length;
     } else {
@@ -790,30 +670,24 @@ document.addEventListener('DOMContentLoaded', () => {
     updateLightbox();
     playPopSound();
   }
-
   function closeLightbox() {
     if (lightbox) lightbox.classList.add('hidden');
   }
-
   if (lightboxPrev) lightboxPrev.addEventListener('click', (e) => { e.stopPropagation(); prevPhoto(); });
   if (lightboxNext) lightboxNext.addEventListener('click', (e) => { e.stopPropagation(); nextPhoto(); });
   if (lightboxClose) lightboxClose.addEventListener('click', closeLightbox);
   if (lightboxBackdrop) lightboxBackdrop.addEventListener('click', closeLightbox);
-
-  // --- OBSŁUGA MODALA DODAWANIA WSPOMNIEŃ ---
   function openMemoryModal() {
     if (!memoryModal) return;
     memoryModal.classList.remove('hidden');
     resetMemoryForm();
     playPopSound();
   }
-
   function closeMemoryModal() {
     if (!memoryModal) return;
     memoryModal.classList.add('hidden');
     resetMemoryForm();
   }
-
   function resetMemoryForm() {
     stagedImageDataUrl = null;
     if (memoryForm) memoryForm.reset();
@@ -822,20 +696,17 @@ document.addEventListener('DOMContentLoaded', () => {
     if (uploadPlaceholder) uploadPlaceholder.classList.remove('hidden');
     if (previewImg) previewImg.src = '';
   }
-
   async function handleFileSelected(file) {
     if (!file || !file.type.startsWith('image/')) {
       alert('Proszę wybrać plik graficzny (zdjęcie)!');
       return;
     }
-
     try {
       if (uploadPlaceholder) {
         uploadPlaceholder.innerHTML = `<span class="upload-icon">⏳</span><span class="upload-text">Przetwarzanie zdjęcia...</span>`;
       }
       const compressedDataUrl = await compressImage(file, 1400, 0.85);
       stagedImageDataUrl = compressedDataUrl;
-
       if (previewImg) previewImg.src = compressedDataUrl;
       if (uploadPlaceholder) uploadPlaceholder.classList.add('hidden');
       if (uploadPreview) uploadPreview.classList.remove('hidden');
@@ -846,7 +717,6 @@ document.addEventListener('DOMContentLoaded', () => {
       resetMemoryForm();
     }
   }
-
   if (openMemoryModalBtn) {
     openMemoryModalBtn.addEventListener('click', openMemoryModal);
   }
@@ -859,22 +729,18 @@ document.addEventListener('DOMContentLoaded', () => {
   if (memoryBackdrop) {
     memoryBackdrop.addEventListener('click', closeMemoryModal);
   }
-
   if (memoryFileInput) {
     memoryFileInput.addEventListener('change', (e) => {
       const file = e.target.files && e.target.files[0];
       if (file) handleFileSelected(file);
     });
   }
-
   if (changeImgBtn) {
     changeImgBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       if (memoryFileInput) memoryFileInput.click();
     });
   }
-
-  // Drag and drop w strefie uploadu
   if (fileDropZone) {
     ['dragenter', 'dragover'].forEach(eventName => {
       fileDropZone.addEventListener(eventName, (e) => {
@@ -883,7 +749,6 @@ document.addEventListener('DOMContentLoaded', () => {
         fileDropZone.classList.add('dragover');
       });
     });
-
     ['dragleave', 'drop'].forEach(eventName => {
       fileDropZone.addEventListener(eventName, (e) => {
         e.preventDefault();
@@ -891,7 +756,6 @@ document.addEventListener('DOMContentLoaded', () => {
         fileDropZone.classList.remove('dragover');
       });
     });
-
     fileDropZone.addEventListener('drop', (e) => {
       const files = e.dataTransfer && e.dataTransfer.files;
       if (files && files.length > 0) {
@@ -899,8 +763,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
-
-  // Zapis formularza
   if (memoryForm) {
     memoryForm.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -908,17 +770,14 @@ document.addEventListener('DOMContentLoaded', () => {
         alert('Proszę wybrać lub przeciągnąć zdjęcie! 📷');
         return;
       }
-
       const captionVal = (memoryCaptionInput ? memoryCaptionInput.value : '').trim();
       if (!captionVal) {
         alert('Napisz chociaż krótki podpis lub wspomnienie! 💕');
         return;
       }
-
       const dateVal = (memoryDateInput ? memoryDateInput.value : '').trim();
       const memoryAuthorInput = document.getElementById('memory-author');
       const authorVal = memoryAuthorInput ? memoryAuthorInput.value : 'Maks ❤️';
-
       const newMemory = {
         url: stagedImageDataUrl,
         caption: captionVal,
@@ -926,20 +785,16 @@ document.addEventListener('DOMContentLoaded', () => {
         author: authorVal,
         createdAt: Date.now()
       };
-
       const submitBtn = document.getElementById('memory-submit-btn');
       if (submitBtn) {
         submitBtn.disabled = true;
         submitBtn.textContent = 'Zapisywanie... ✨';
       }
-
       try {
         await saveStoredMemory(newMemory);
         closeMemoryModal();
         await renderGallery();
         playSuccessSound();
-
-        // Efekt konfetti serduszkowego
         for (let i = 0; i < 20; i++) {
           setTimeout(() => {
             spawnFloatingHeart(
@@ -960,8 +815,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
-
-  // Klawisz Escape zamyka otwarty modal
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       if (memoryModal && !memoryModal.classList.contains('hidden')) {
@@ -969,31 +822,23 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
   });
-
-  // Startowe załadowanie galerii
   renderGallery();
-
-  // --- OBSŁUGA EKSPORTU I IMPORTU WSPOMNIEŃ (DLA MAKS & OLIWII) ---
   const exportMemoriesBtn = document.getElementById('export-memories-btn');
   const importMemoriesBtn = document.getElementById('import-memories-btn');
   const importJsonInput = document.getElementById('import-json-input');
-
   if (exportMemoriesBtn) {
     exportMemoriesBtn.addEventListener('click', async () => {
       const memories = await getStoredMemories();
       const bucketList = await getBucketList();
-
       const exportData = {
         version: 1,
         createdAt: new Date().toISOString(),
         memories: memories,
         bucketList: bucketList
       };
-
       const jsonStr = JSON.stringify(exportData, null, 2);
       const blob = new Blob([jsonStr], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
-
       const a = document.createElement('a');
       a.href = url;
       a.download = `oliwka_dane_${new Date().toISOString().slice(0, 10)}.json`;
@@ -1004,23 +849,19 @@ document.addEventListener('DOMContentLoaded', () => {
       playSuccessSound();
     });
   }
-
   if (importMemoriesBtn && importJsonInput) {
     importMemoriesBtn.addEventListener('click', () => {
       importJsonInput.click();
     });
-
     importJsonInput.addEventListener('change', async (e) => {
       const file = e.target.files && e.target.files[0];
       if (!file) return;
-
       const reader = new FileReader();
       reader.onload = async (event) => {
         try {
           const importedData = JSON.parse(event.target.result);
           let memoriesCount = 0;
           let bucketCount = 0;
-
           if (Array.isArray(importedData)) {
             for (const item of importedData) {
               if (item.url && item.caption) {
@@ -1045,7 +886,6 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('Nieprawidłowy format pliku!');
             return;
           }
-
           await renderGallery();
           renderBucketList();
           playSuccessSound();
@@ -1061,7 +901,6 @@ document.addEventListener('DOMContentLoaded', () => {
       reader.readAsText(file);
     });
   }
-
   document.addEventListener('keydown', (e) => {
     if (lightbox && !lightbox.classList.contains('hidden')) {
       if (e.key === 'Escape') closeLightbox();
@@ -1069,15 +908,12 @@ document.addEventListener('DOMContentLoaded', () => {
       if (e.key === 'ArrowRight') nextPhoto();
     }
   });
-
-  // Obsługa gestów swipe na telefonie w lightboxie
   let touchStartX = 0;
   let touchEndX = 0;
   if (lightbox) {
     lightbox.addEventListener('touchstart', (e) => {
       touchStartX = e.changedTouches[0].screenX;
     }, { passive: true });
-
     lightbox.addEventListener('touchend', (e) => {
       touchEndX = e.changedTouches[0].screenX;
       const diff = touchEndX - touchStartX;
@@ -1087,30 +923,21 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }, { passive: true });
   }
-
-  // ---------------------------------------------------------------------------
-  // 0. EKRAN WEJŚCIOWY / SPLASH INTRO Z ANIMOWANYM SERCEM I LICZNIKIEM 5S
-  // ---------------------------------------------------------------------------
   const entryOverlay = document.getElementById('entry-overlay');
   const entryStep1 = document.getElementById('entry-step-1');
   const entryStep2 = document.getElementById('entry-step-2');
   const entryStartBtn = document.getElementById('entry-start-btn');
   const entryTimerCount = document.getElementById('entry-timer-count');
-
   let entryCountdownTimer = null;
   let hasEntered = false;
-
   if (entryOverlay && entryOverlay.style.display !== 'none') {
     document.body.style.overflow = 'hidden';
   }
-
   function dismissEntryScreen() {
     if (hasEntered) return;
     hasEntered = true;
     if (entryCountdownTimer) clearInterval(entryCountdownTimer);
-
     document.body.style.overflow = '';
-
     if (entryOverlay) {
       entryOverlay.style.transition = 'opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s ease';
       entryOverlay.style.opacity = '0';
@@ -1120,19 +947,14 @@ document.addEventListener('DOMContentLoaded', () => {
       }, 800);
     }
   }
-
   function startEntrySequence() {
     initAudio();
     playMagicSound();
-
     if (entryStep1) entryStep1.classList.add('hidden');
     if (entryStep2) entryStep2.classList.remove('hidden');
-
     fireHeartConfetti();
-
     let secondsLeft = 5;
     if (entryTimerCount) entryTimerCount.textContent = secondsLeft;
-
     entryCountdownTimer = setInterval(() => {
       secondsLeft--;
       if (entryTimerCount) entryTimerCount.textContent = secondsLeft;
@@ -1142,11 +964,9 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }, 1000);
   }
-
   if (entryStartBtn) {
     entryStartBtn.addEventListener('click', startEntrySequence);
   }
-
   const giantHeartClickable = document.getElementById('giant-heart-clickable');
   if (giantHeartClickable) {
     giantHeartClickable.addEventListener('click', (e) => {
@@ -1159,7 +979,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }, 400);
     });
   }
-
   const entrySkipBtn = document.getElementById('entry-skip-btn');
   if (entrySkipBtn) {
     entrySkipBtn.addEventListener('click', (e) => {
@@ -1167,39 +986,29 @@ document.addEventListener('DOMContentLoaded', () => {
       dismissEntryScreen();
     });
   }
-
   if (entryStep2) {
     entryStep2.addEventListener('click', () => {
       dismissEntryScreen();
     });
   }
-
-  // ---------------------------------------------------------------------------
-  // 7. SŁOICZEK Z POWODAMI
-  // ---------------------------------------------------------------------------
   const loveNotes = config.loveNotes || [
     "Masz przepiękny uśmiech! 😊❤️",
     "Rozmowy z Tobą zlatują w ułamku sekundy. ⏳✨"
   ];
-
   const drawNoteBtn = document.getElementById('draw-note-btn');
   const noteDisplayCard = document.getElementById('note-display-card');
   const noteTextContent = document.getElementById('note-text-content');
   const nextNoteBtn = document.getElementById('next-note-btn');
-
   let lastNoteIdx = -1;
-
   function drawRandomNote() {
     if (!loveNotes.length) return;
     initAudio();
     playMagicSound();
-
     let randIdx;
     do {
       randIdx = Math.floor(Math.random() * loveNotes.length);
     } while (loveNotes.length > 1 && randIdx === lastNoteIdx);
     lastNoteIdx = randIdx;
-
     if (drawNoteBtn) drawNoteBtn.classList.add('hidden');
     if (noteDisplayCard) {
       noteDisplayCard.classList.remove('hidden');
@@ -1212,40 +1021,27 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     fireHeartConfetti();
   }
-
   if (drawNoteBtn) drawNoteBtn.addEventListener('click', drawRandomNote);
   if (nextNoteBtn) nextNoteBtn.addEventListener('click', drawRandomNote);
-
-  // ---------------------------------------------------------------------------
-  // 8. RULETKA RANDKOWA / GENERATOR POMYSŁÓW
-  // ---------------------------------------------------------------------------
   const dateIdeas = config.dateIdeas || [
     { text: "Wyjście na lody & spacer 🍦🌅", icon: "🍦" },
     { text: "Maraton filmowy z pizzą 🎬🍕", icon: "🍿" }
   ];
-
-  // ---------------------------------------------------------------------------
-  // 8. KOSMICZNE TŁO CZĄSTECZEK (CANVAS)
-  // ---------------------------------------------------------------------------
   const canvas = document.getElementById('bg-canvas');
   if (canvas) {
     const ctx = canvas.getContext('2d');
     let width = (canvas.width = window.innerWidth);
     let height = (canvas.height = window.innerHeight);
-
     window.addEventListener('resize', () => {
       width = canvas.width = window.innerWidth;
       height = canvas.height = window.innerHeight;
     });
-
     const particles = [];
     const particleCount = Math.min(width < 600 ? 30 : 60, 80);
-
     class Particle {
       constructor() {
         this.reset();
       }
-
       reset() {
         this.x = Math.random() * width;
         this.y = Math.random() * height;
@@ -1256,26 +1052,21 @@ document.addEventListener('DOMContentLoaded', () => {
         this.isHeart = Math.random() > 0.65;
         this.color = Math.random() > 0.5 ? '#ff2d87' : '#8b3eff';
       }
-
       update() {
         this.y += this.speedY;
         this.x += this.speedX;
-
         if (this.y < -20) {
           this.y = height + 20;
           this.x = Math.random() * width;
         }
       }
-
       draw() {
         ctx.save();
         ctx.globalAlpha = this.opacity;
         ctx.fillStyle = this.color;
         ctx.shadowBlur = 10;
         ctx.shadowColor = this.color;
-
         if (this.isHeart) {
-          // Rysowanie małego serduszka
           const s = this.size * 1.8;
           ctx.beginPath();
           ctx.moveTo(this.x, this.y);
@@ -1283,20 +1074,16 @@ document.addEventListener('DOMContentLoaded', () => {
           ctx.bezierCurveTo(this.x + s * 1.5, this.y + s * 0.5, this.x + s, this.y - s, this.x, this.y);
           ctx.fill();
         } else {
-          // Błyszcząca cząsteczka
           ctx.beginPath();
           ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
           ctx.fill();
         }
-
         ctx.restore();
       }
     }
-
     for (let i = 0; i < particleCount; i++) {
       particles.push(new Particle());
     }
-
     function animateParticles() {
       ctx.clearRect(0, 0, width, height);
       particles.forEach(p => {
@@ -1305,25 +1092,16 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       requestAnimationFrame(animateParticles);
     }
-
     animateParticles();
-
-    // Dodawanie serduszek przy kliknięciu/dotknięciu tła
     window.addEventListener('click', (e) => {
-      // Ignorujemy kliknięcia w przyciski i linki
       if (e.target.closest('button') || e.target.closest('a') || e.target.closest('.envelope') || e.target.closest('.bucket-item')) return;
       incrementHearts(1);
     });
   }
-
-  // ---------------------------------------------------------------------------
-  // OBSŁUGA NASZEJ LISTY 📝✨ (Z SYNCHRONIZACJĄ SUPABASE)
-  // ---------------------------------------------------------------------------
   const BUCKET_STORAGE_KEY = 'oliwia_bucket_list_v1';
   const bucketListGrid = document.getElementById('bucket-list-grid');
   const addBucketForm = document.getElementById('add-bucket-form');
   const bucketInput = document.getElementById('bucket-input');
-
   async function getBucketList() {
     if (supabaseClient) {
       try {
@@ -1331,7 +1109,6 @@ document.addEventListener('DOMContentLoaded', () => {
           .from('list_items')
           .select('*')
           .order('id', { ascending: true });
-
         if (!error && Array.isArray(data)) {
           if (data.length > 0) {
             return data.map(item => ({
@@ -1341,7 +1118,6 @@ document.addEventListener('DOMContentLoaded', () => {
               author: item.author || ''
             }));
           } else if (Array.isArray(config.bucketList) && config.bucketList.length > 0) {
-            // Seeding domyślnych marzeń do Supabase
             const seedItems = config.bucketList.map(item => ({
               title: item.title,
               completed: item.completed || false,
@@ -1351,7 +1127,6 @@ document.addEventListener('DOMContentLoaded', () => {
               .from('list_items')
               .insert(seedItems)
               .select();
-
             if (!seedErr && Array.isArray(seeded) && seeded.length > 0) {
               return seeded.map(item => ({
                 id: item.id,
@@ -1377,7 +1152,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     return config.bucketList || [];
   }
-
   function saveBucketListLocal(list) {
     try {
       localStorage.setItem(BUCKET_STORAGE_KEY, JSON.stringify(list));
@@ -1385,23 +1159,19 @@ document.addEventListener('DOMContentLoaded', () => {
       console.error(e);
     }
   }
-
   async function renderBucketList() {
     if (!bucketListGrid) return;
     try {
       const rawItems = await getBucketList();
       const items = Array.isArray(rawItems) ? rawItems : [];
       bucketListGrid.innerHTML = '';
-
     items.forEach((item, index) => {
       const card = document.createElement('div');
       card.className = `bucket-item ${item.completed ? 'completed' : ''}`;
-      
       const authorClass = (item.author || '').toLowerCase().includes('oliwia') ? 'author-oliwia' : 'author-maks';
       const authorBadge = item.author 
         ? `<span class="bucket-author-tag ${authorClass}">👤 ${escapeHTML(item.author)}</span>` 
         : '';
-
       card.innerHTML = `
         <div class="bucket-checkbox">${item.completed ? '✓' : ''}</div>
         <div class="bucket-item-content">
@@ -1411,17 +1181,14 @@ document.addEventListener('DOMContentLoaded', () => {
         <span class="bucket-status-badge">${item.completed ? 'Spełnione 🎉' : 'Do zrealizowania ⏳'}</span>
         <button class="bucket-delete-btn" title="Usuń wpis" data-id="${item.id}" data-index="${index}">✕</button>
       `;
-
       card.addEventListener('click', async (e) => {
         if (e.target.classList.contains('bucket-delete-btn')) {
           e.stopPropagation();
           await deleteBucketItem(item.id, index);
           return;
         }
-
         const newCompleted = !item.completed;
         item.completed = newCompleted;
-
         if (supabaseClient) {
           try {
             await supabaseClient
@@ -1432,24 +1199,20 @@ document.addEventListener('DOMContentLoaded', () => {
             console.warn('Supabase update list item error:', e);
           }
         }
-
         items[index].completed = newCompleted;
         saveBucketListLocal(items);
         await renderBucketList();
-
         if (newCompleted) {
           playSuccessSound();
           fireHeartConfetti();
         }
       });
-
       bucketListGrid.appendChild(card);
     });
     } catch (e) {
       console.error('renderBucketList error:', e);
     }
   }
-
   async function deleteBucketItem(id, index) {
     if (supabaseClient) {
       try {
@@ -1466,48 +1229,37 @@ document.addEventListener('DOMContentLoaded', () => {
     saveBucketListLocal(updated);
     await renderBucketList();
   }
-
   if (addBucketForm && bucketInput) {
     addBucketForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const text = bucketInput.value.trim();
       if (!text) return;
-
       const bucketAuthorSelect = document.getElementById('bucket-author');
       const authorVal = bucketAuthorSelect ? bucketAuthorSelect.value : 'Maks ❤️';
-
       const newItem = {
         title: text,
         completed: false,
         author: authorVal
       };
-
       if (supabaseClient) {
         try {
-          const { data, error } = await supabaseClient
+          await supabaseClient
             .from('list_items')
-            .insert([newItem])
-            .select();
-
-          if (!error && data && data[0]) {
-            console.log('Punkt pomyślnie dodany do Supabase!');
-          }
+            .insert([newItem]);
         } catch (e) {
           console.warn('Supabase add list item error:', e);
         }
+      } else {
+        const items = await getBucketList();
+        items.push({ id: Date.now(), ...newItem });
+        saveBucketListLocal(items);
       }
-
-      const items = await getBucketList();
-      items.push({ id: Date.now(), ...newItem });
-      saveBucketListLocal(items);
       bucketInput.value = '';
       await renderBucketList();
       playMagicSound();
       fireHeartConfetti();
     });
   }
-
-  // NASŁUCHIWACZ ZMIAN W CZASIE RZECZYWISTYM (REALTIME SYNCHRONIZATION)
   if (supabaseClient) {
     try {
       supabaseClient
@@ -1529,6 +1281,5 @@ document.addEventListener('DOMContentLoaded', () => {
       console.warn('Supabase realtime channel error:', e);
     }
   }
-
   renderBucketList();
 });
