@@ -85,9 +85,9 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ---------------------------------------------------------------------------
-  // 2. SYNTEZATOR DŹWIĘKÓW (Web Audio API - bez zewnętrznych plików)
+  // 2. SYNTEZATOR DŹWIĘKÓW (Całkowicie wyłączony)
   // ---------------------------------------------------------------------------
-  let soundEnabled = true;
+  let soundEnabled = false;
   let audioCtx = null;
 
   function initAudio() {
@@ -1092,10 +1092,16 @@ document.addEventListener('DOMContentLoaded', () => {
   let entryCountdownTimer = null;
   let hasEntered = false;
 
+  if (entryOverlay && entryOverlay.style.display !== 'none') {
+    document.body.style.overflow = 'hidden';
+  }
+
   function dismissEntryScreen() {
     if (hasEntered) return;
     hasEntered = true;
     if (entryCountdownTimer) clearInterval(entryCountdownTimer);
+
+    document.body.style.overflow = '';
 
     if (entryOverlay) {
       entryOverlay.style.transition = 'opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s ease';
@@ -1310,13 +1316,35 @@ document.addEventListener('DOMContentLoaded', () => {
           .select('*')
           .order('id', { ascending: true });
 
-        if (!error && Array.isArray(data) && data.length > 0) {
-          return data.map(item => ({
-            id: item.id,
-            title: item.title,
-            completed: Boolean(item.completed),
-            author: item.author || ''
-          }));
+        if (!error && Array.isArray(data)) {
+          if (data.length > 0) {
+            return data.map(item => ({
+              id: item.id,
+              title: item.title,
+              completed: Boolean(item.completed),
+              author: item.author || ''
+            }));
+          } else if (Array.isArray(config.bucketList) && config.bucketList.length > 0) {
+            // Seeding domyślnych marzeń do Supabase
+            const seedItems = config.bucketList.map(item => ({
+              title: item.title,
+              completed: item.completed || false,
+              author: 'Maks ❤️'
+            }));
+            const { data: seeded, error: seedErr } = await supabaseClient
+              .from('list_items')
+              .insert(seedItems)
+              .select();
+
+            if (!seedErr && Array.isArray(seeded) && seeded.length > 0) {
+              return seeded.map(item => ({
+                id: item.id,
+                title: item.title,
+                completed: Boolean(item.completed),
+                author: item.author || ''
+              }));
+            }
+          }
         }
       } catch (e) {
         console.warn('Supabase fetch list error:', e);
@@ -1324,7 +1352,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     try {
       const stored = localStorage.getItem(BUCKET_STORAGE_KEY);
-      if (stored) return JSON.parse(stored);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
     } catch (e) {
       console.error(e);
     }

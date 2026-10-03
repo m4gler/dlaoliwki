@@ -1045,12 +1045,17 @@ body {
 /* EKRAN WEJŚCIOWY / SPLASH INTRO Z WIELKIM SERCEM */
 .entry-overlay {
   position: fixed;
-  inset: 0;
-  z-index: 99999;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 999999;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 20px;
+  overflow: hidden;
+  background: #070312;
 }
 
 .entry-backdrop {
