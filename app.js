@@ -973,7 +973,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (exportMemoriesBtn) {
     exportMemoriesBtn.addEventListener('click', async () => {
       const memories = await getStoredMemories();
-      const bucketList = getBucketList();
+      const bucketList = await getBucketList();
 
       const exportData = {
         version: 1,
@@ -1030,7 +1030,7 @@ document.addEventListener('DOMContentLoaded', () => {
               }
             }
             if (Array.isArray(importedData.bucketList)) {
-              saveBucketList(importedData.bucketList);
+              saveBucketListLocal(importedData.bucketList);
               bucketCount = importedData.bucketList.length;
             }
           } else {
