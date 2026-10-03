@@ -1129,58 +1129,57 @@ body {
 
 .giant-heart-wrapper {
   position: relative;
-  width: min(650px, 94vw);
-  max-height: 72vh;
+  width: min(380px, 85vw);
+  max-height: 55vh;
   aspect-ratio: 1 / 1;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   user-select: none;
+  transform: translateZ(0);
   transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .giant-heart-wrapper:active {
-  transform: scale(0.94);
+  transform: scale(0.94) translateZ(0);
 }
 
 .giant-heart-glow-outer {
   position: absolute;
-  inset: -100px;
-  background: radial-gradient(circle, rgba(255, 45, 135, 0.85) 0%, rgba(184, 20, 223, 0.5) 45%, rgba(0, 242, 254, 0.2) 75%, transparent 90%);
+  inset: -30px;
+  background: radial-gradient(circle, rgba(255, 45, 135, 0.6) 0%, rgba(184, 20, 223, 0.35) 50%, transparent 80%);
   border-radius: 50%;
   animation: giantOuterPulse 2.4s ease-in-out infinite alternate;
-  filter: blur(35px);
   pointer-events: none;
 }
 
 @keyframes giantOuterPulse {
-  0% { transform: scale(0.88); opacity: 0.5; }
-  100% { transform: scale(1.4); opacity: 0.95; }
+  0% { transform: scale(0.9); opacity: 0.6; }
+  100% { transform: scale(1.2); opacity: 0.95; }
 }
 
 .giant-heart-glow {
   position: absolute;
-  inset: -40px;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.9) 0%, rgba(255, 45, 135, 1) 40%, rgba(184, 20, 223, 0.6) 70%, transparent 85%);
+  inset: -15px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.8) 0%, rgba(255, 45, 135, 0.9) 45%, rgba(184, 20, 223, 0.5) 75%, transparent 90%);
   border-radius: 50%;
   animation: giantGlowPulse 1.1s ease-in-out infinite alternate;
-  filter: blur(25px);
   pointer-events: none;
 }
 
 @keyframes giantGlowPulse {
-  0% { transform: scale(0.9); opacity: 0.7; }
-  100% { transform: scale(1.3); opacity: 1; }
+  0% { transform: scale(0.92); opacity: 0.7; }
+  100% { transform: scale(1.15); opacity: 1; }
 }
 
 .giant-heart-orbit {
   position: absolute;
-  inset: -30px;
+  inset: -15px;
   border: 2px dashed rgba(255, 255, 255, 0.4);
   border-radius: 50%;
   animation: rotateOrbit 12s linear infinite;
-  box-shadow: 0 0 25px rgba(255, 45, 135, 0.6);
+  box-shadow: 0 0 20px rgba(255, 45, 135, 0.5);
   pointer-events: none;
 }
 
@@ -1191,11 +1190,12 @@ body {
 
 .giant-heart-wrapper::before {
   content: '❤️';
-  font-size: clamp(24rem, 74vw, 42rem);
+  font-size: clamp(12rem, 48vw, 20rem);
   line-height: 1;
-  filter: drop-shadow(0 0 80px rgba(255, 45, 135, 1)) drop-shadow(0 0 150px rgba(184, 20, 223, 0.9)) drop-shadow(0 0 240px rgba(255, 45, 135, 0.75)) drop-shadow(0 0 320px rgba(255, 215, 0, 0.5));
+  filter: drop-shadow(0 0 25px rgba(255, 45, 135, 0.9)) drop-shadow(0 0 50px rgba(184, 20, 223, 0.7));
   animation: heartBeatScale 1.1s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
   display: block;
+  transform: translateZ(0);
 }
 
 @keyframes heartBeatScale {

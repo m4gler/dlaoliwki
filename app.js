@@ -1153,6 +1153,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  const entrySkipBtn = document.getElementById('entry-skip-btn');
+  if (entrySkipBtn) {
+    entrySkipBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      dismissEntryScreen();
+    });
+  }
+
   if (entryStep2) {
     entryStep2.addEventListener('click', () => {
       dismissEntryScreen();
