@@ -12,12 +12,13 @@ document.addEventListener('DOMContentLoaded', () => {
   const SUPABASE_KEY = config.supabaseKey;
   let supabaseClient = null;
 
-  if (window.supabase && SUPABASE_URL && SUPABASE_KEY) {
+  if (typeof window !== 'undefined' && window.supabase && typeof window.supabase.createClient === 'function' && SUPABASE_URL && SUPABASE_KEY) {
     try {
       supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
       console.log('⚡ Supabase pomyślnie połączony!');
     } catch (e) {
       console.warn('Błąd inicjalizacji Supabase:', e);
+      supabaseClient = null;
     }
   }
 
