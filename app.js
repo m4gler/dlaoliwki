@@ -448,26 +448,28 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    const db = await openMemoriesDB();
-    if (!db) {
-      try {
-        const fallback = localStorage.getItem('oliwka_custom_memories');
-        return fallback ? JSON.parse(fallback) : [];
-      } catch (e) {
-        return [];
+    try {
+      const db = await openMemoriesDB();
+      if (db) {
+        const items = await new Promise((resolve) => {
+          const tx = db.transaction(STORE_NAME, 'readonly');
+          const store = tx.objectStore(STORE_NAME);
+          const req = store.getAll();
+          req.onsuccess = () => resolve(req.result || []);
+          req.onerror = () => resolve([]);
+        });
+        if (Array.isArray(items)) return items;
       }
+    } catch (e) {
+      console.warn('IndexedDB fallback error:', e);
     }
-    return new Promise((resolve) => {
-      try {
-        const tx = db.transaction(STORE_NAME, 'readonly');
-        const store = tx.objectStore(STORE_NAME);
-        const req = store.getAll();
-        req.onsuccess = () => resolve(req.result || []);
-        req.onerror = () => resolve([]);
-      } catch (e) {
-        resolve([]);
-      }
-    });
+
+    try {
+      const fallback = localStorage.getItem('oliwka_custom_memories');
+      return fallback ? JSON.parse(fallback) : [];
+    } catch (e) {
+      return [];
+    }
   }
 
   async function saveStoredMemory(item) {
@@ -595,13 +597,15 @@ document.addEventListener('DOMContentLoaded', () => {
   async function renderGallery() {
     if (!galleryGrid) return;
 
-    // Czyścimy poprzednie timery karuzel
-    multiPhotoTimers.forEach(timer => clearInterval(timer));
-    multiPhotoTimers = [];
+    try {
+      // Czyścimy poprzednie timery karuzel
+      multiPhotoTimers.forEach(timer => clearInterval(timer));
+      multiPhotoTimers = [];
 
-    const customMemories = await getStoredMemories();
-    const baseGallery = Array.isArray(config.gallery) ? config.gallery : [];
-    allGalleryItems = [...baseGallery, ...customMemories];
+      const rawCustom = await getStoredMemories();
+      const customMemories = Array.isArray(rawCustom) ? rawCustom : [];
+      const baseGallery = Array.isArray(config.gallery) ? config.gallery : [];
+      allGalleryItems = [...baseGallery, ...customMemories];
 
     let html = allGalleryItems.map((item, index) => {
       const isCustom = Boolean(item.id);
@@ -708,6 +712,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       });
     });
+    } catch (e) {
+      console.error('renderGallery error:', e);
+    }
   }
 
   // --- OBSŁUGA LIGHTBOXA ---
@@ -1381,8 +1388,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function renderBucketList() {
     if (!bucketListGrid) return;
-    const items = await getBucketList();
-    bucketListGrid.innerHTML = '';
+    try {
+      const rawItems = await getBucketList();
+      const items = Array.isArray(rawItems) ? rawItems : [];
+      bucketListGrid.innerHTML = '';
 
     items.forEach((item, index) => {
       const card = document.createElement('div');
@@ -1436,6 +1445,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
       bucketListGrid.appendChild(card);
     });
+    } catch (e) {
+      console.error('renderBucketList error:', e);
+    }
   }
 
   async function deleteBucketItem(id, index) {
